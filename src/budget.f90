@@ -29,7 +29,7 @@ contains
        &,cl1_pft,ca1_pft,cf1_pft,w2,g2,s2,smavg,ruavg,evavg,epavg&
        &,phavg,aravg,nppavg,laiavg,clavg,csavg,hravg,rcavg,rmavg,rgavg&
        &,cleafavg_pft,cawoodavg_pft,cfrootavg_pft,ocpavg,wueavg,cueavg,hgtavg_pft&
-       &,diamavg_pft)
+       &,diamavg_pft,canradiusavg_pft)
     
     use types
     use global_pars
@@ -86,6 +86,8 @@ contains
     real(kind=r_4),intent(out),dimension(npft) :: wueavg,cueavg
     real(kind=r_4),intent(out),dimension(npft) :: hgtavg_pft     !height of each pls (m)
     real(kind=r_4),intent(out),dimension(npft) :: diamavg_pft    !diameter of each pls (m)
+    real(kind=r_4),intent(out),dimension(npft) :: canradiusavg_pft    !canopy radius of each pls (unit????)
+
     !     -----------------------Internal Variables------------------------
     integer(kind=i_4) :: p ,i
     
@@ -244,7 +246,7 @@ contains
           b2=2.6  !put it into global f.90
           hgtavg_pft(p)= exp((log(cawoodavg_pft(p)*2*100) + b1)/b2) !equation from adgvm2 !(*2) is the convertion from
                                         !carbon content to biomass. For now, we are just ignoring that our cawood is
-                                        !kgC/m2 and I multiplied by 100 because of the magnitude difference between
+                                        !kgC/m2 (considering only as kgC) and I multiplied by 100 because of the magnitude difference between
                                         !our values and the ones from adgvm2
          
           
@@ -253,15 +255,20 @@ contains
           diamavg_pft(p)= 2.0*(sqrt((cawoodavg_pft(p)*2.0*100.0)/(pi*pwood*hgtavg_pft(p)))) !equation from adgvm2 !(*2) is the 
                                         !convertion from
                                         !carbon content to biomass. For now, we are just ignoring that our cawood is
-                                        !kgC/m2 and I multiplied by 100 because of the magnitude difference between
+                                        !kgC/m2 (considering only as kgC) and I multiplied by 100 because of the magnitude difference between
                                         !our values and the ones from adgvm2
+
+         canradiusavg_pft(p) = 10.0*diamavg_pft(p) !equation from adgvm2 !just a simplification now         
+
          if (hgtavg_pft(p).eq.0.0)then
             diamavg_pft(p)=0.0
+            canradiusavg_pft(p)=0.0
          else
             diamavg_pft(p)=diamavg_pft(p)
+            canradiusavg_pft(p)=canradiusavg_pft(p)
          endif
              
-         print*, "hgt_pft", hgtavg_pft(p),cawoodavg_pft(p),'diam_pft', diamavg_pft(p)
+         print*, "hgt_pft", hgtavg_pft(p),cawoodavg_pft(p),'diam_pft', diamavg_pft(p),'canradius_pft',canradiusavg_pft(p)
 
           call prod(dt1,OCP_WOOD(P),temp,ts,p0,w(p)&
                &,ipar,rh,emax,cl1(p),ca1(p),cf1(p),beta_leaf(p)&
