@@ -136,6 +136,8 @@ contains
     logical(kind=l_1) :: end_pls = .false., no_cell = .false.
     real(kind=r_4) :: ocp = 0
     real(kind=r_4) :: ae
+    real(kind=r_4) :: b1 !allometric parameter for Height calculation
+    real(kind=r_4) :: b2 !allometric parameter for Height calculation
   
     !integer(kind=i_4),dimension(12) :: ndmonth       !Number of months
     !data ndmonth /31,28,31,30,31,30,31,31,30,31,30,31/ !Number of days for each month 
@@ -234,9 +236,14 @@ contains
           dt1 = dt(:,p)
           ocp = ocp_coeffs(p)
           
-          hgtavg_pft(p)= exp((log(cawoodavg_pft(p)*100.0) + 0.45)/2.6) !equation from adgvm2 (height=exp((log(stem_biomass)+b1)/b2),
-          !values used here just for testing purpose
-          print*, "hgt_pft", hgtavg_pft(p),cawoodavg_pft(p),ocp_coeffs(p)          
+          
+          b1=0.45
+          b2=2.6
+          hgtavg_pft(p)= exp((log(cawoodavg_pft(p)*2*100) + b1)/b2) !equation from adgvm2 !(*2) is the convertion from
+                                        !carbon content for biomass. For now, we are just ignoring that our cawood is
+                                        !kgC/m2 and I multiplied by 100 because of the magnitude difference between
+                                        !our values and the ones from adgvm2
+          print*, "hgt_pft", hgtavg_pft(p),cawoodavg_pft(p),ocp_coeffs(p)       
 
           call prod(dt1,OCP_WOOD(P),temp,ts,p0,w(p)&
                &,ipar,rh,emax,cl1(p),ca1(p),cf1(p),beta_leaf(p)&

@@ -84,7 +84,7 @@ contains
     implicit none
     
     real(kind=r_4),intent(in) :: cleaf !kgC m-2 
-    real(kind=r_4),intent(in) :: sla   !m-2 gC-1
+    real(kind=r_4),intent(in) :: sla   !m2 gC-1
     real(kind=r_4) :: lai
     
     
