@@ -29,7 +29,7 @@ contains
        &,cfroot_ini,emaxm, tsoil, photo_pft,aresp_pft,npp_pft,lai_pft&
        &,clit_pft,csoil_pft, hresp_pft,rcm_pft,runom_pft,evapm_pft&
        &,wsoil_pft,rm_pft,rg_pft,cleaf_pft,cawood_pft,cfroot_pft&
-       &,grid_area,grid_area0,wue,cue)
+       &,grid_area,grid_area0,wue,cue,height_pft)
     
     use types
     use global_pars
@@ -82,6 +82,7 @@ contains
     real(kind=r_4),dimension(q),intent(out) :: cfroot_pft  ! fine root biomass      
     real(kind=r_4),dimension(q),intent(out) :: grid_area   ! gridcell area fraction of pfts!
     real(kind=r_4),dimension(q),intent(out) :: grid_area0   ! gridcell area fraction of pfts!
+    real(kind=r_4),dimension(q),intent(out) :: height_pft   ! height (m)
     !  c     --------------------------------E N D----------------------------
     
     !  c     ------------------------- internal variables---------------------
@@ -108,7 +109,8 @@ contains
     real(kind=r_4),dimension(q) :: nppmes,laimes, armes,clmes,csmes
     real(kind=r_4),dimension(q) :: emes,rmmes,rgmes,cuemes
     real(kind=r_4),dimension(q) :: cleafmes,cawoodmes,cfrootmes
-    real(kind=r_4),dimension(q) :: gridocpmes,sm,wuemes 
+    real(kind=r_4),dimension(q) :: gridocpmes,sm,wuemes
+    real(kind=r_4),dimension(q) :: hgtmes
     real(kind=r_4) :: wsaux1 !auxiliar to check water equilibrium
     real(kind=r_4) :: dwww !auxiliar to check water equilibrium
     real(kind=r_4) :: pr,spre,ta,td,ipar,ru
@@ -145,7 +147,8 @@ contains
     cleaf_pft  = 0.0 ! leaf biomass (KgC/m2)
     cawood_pft = 0.0 ! aboveground wood biomass (KgC/m2)
     cfroot_pft = 0.0 ! fine root biomass (KgC/m2)
-    ! grid_area0  = 0.0 ! gridcell (spinup) area fraction of pfts(%)
+    cfroot_pft = 0.0 ! fine root biomass (KgC/m2)
+    height_pft  = 0.0 ! height(m)
     grid_area  = 0.0 ! gridcell area fraction of pfts(%)
     
     wg0 = -1.0 !Soil water content in preceeding year integration
@@ -220,12 +223,13 @@ contains
     gridocpmes = 0.0
     wuemes = 0.0
     wuemes = 0.0
+    hgtmes = 0.0
     
     call budget (dt,mes,wini,gini,sini,td,ta,pr,spre,ipar,ru&
          &,cleaf1_pft,cawood1_pft,cfroot1_pft ,wfim,gfim, sfim,smes&
          &,rmes,emes,epmes,phmes,armes,nppmes,laimes,clmes,csmes,hrmes&
          &,rcmes,rmmes,rgmes,cleafmes,cawoodmes,cfrootmes, gridocpmes&
-         &,wuemes,cuemes)
+         &,wuemes,cuemes,hgtmes)
     
     emaxm(k) = epmes
     do p=1,q

@@ -28,7 +28,7 @@ contains
   subroutine budget (dt,month,w1,g1,s1,ts,temp,prec,p0,ipar,rh&
        &,cl1_pft,ca1_pft,cf1_pft,w2,g2,s2,smavg,ruavg,evavg,epavg&
        &,phavg,aravg,nppavg,laiavg,clavg,csavg,hravg,rcavg,rmavg,rgavg&
-       &,cleafavg_pft,cawoodavg_pft,cfrootavg_pft,ocpavg,wueavg,cueavg)
+       &,cleafavg_pft,cawoodavg_pft,cfrootavg_pft,ocpavg,wueavg,cueavg,hgtavg_pft)
     
     use types
     use global_pars
@@ -83,6 +83,7 @@ contains
     real(kind=r_4),intent(out),dimension(npft) :: cfrootavg_pft
     real(kind=r_4),intent(out),dimension(npft) :: ocpavg
     real(kind=r_4),intent(out),dimension(npft) :: wueavg,cueavg
+    real(kind=r_4),intent(out),dimension(npft) :: hgtavg_pft     !height of each pls
     !     -----------------------Internal Variables------------------------
     integer(kind=i_4) :: p ,i
     
@@ -90,6 +91,7 @@ contains
     real(kind=r_4),dimension(npft) :: beta_leaf, beta_awood, beta_froot
 
     real(kind=r_4),dimension(ntraits) :: dt1
+    
     
     !     RELATED WITH GRIDCELL OCUPATION
     
@@ -182,6 +184,7 @@ contains
        wueavg(p)  = 0.0
        cueavg(p)  = 0.0 
        ocp_mm(p)  = 0.0
+       hgtavg_pft(p) = 0.0
        
        alfa_leaf(p) = 1e-7
        alfa_awood(p) = 1e-7
@@ -213,6 +216,7 @@ contains
        rg    = 0.0 
        wue   = 0.0
        cue   = 0.0
+       print*, "working"
        
        !     Grid cell area fraction (%) ocp_coeffs(pft(1), pft(2), ...,pft(p))
        !     =================================================================     
@@ -230,6 +234,9 @@ contains
           dt1 = dt(:,p)
           ocp = ocp_coeffs(p)
           
+          hgtavg_pft(p)=exp((log(600.0) + 0.45)/2.6) !equation from adgvm2 (height=exp((log(stem_biomass)+b1)/b2),
+          !values used here just for testing purpose
+          print*, "hgt_pft", hgtavg_pft(p)          
 
           call prod(dt1,OCP_WOOD(P),temp,ts,p0,w(p)&
                &,ipar,rh,emax,cl1(p),ca1(p),cf1(p),beta_leaf(p)&
