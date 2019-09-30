@@ -53,6 +53,9 @@ module global_pars
   real(kind=r_8),parameter :: ncf = (1.0/29.0)          !(gN/gC)
   real(kind=r_8),parameter :: ncs = (1.0/330.0)         !(gN/gC)
 
+ ! real(kind=r_8),parameter :: b1 = 0.45 !allometric parameter for height calculation (to be a functional trait in next steps)
+ ! real(kind=r_8),parameter :: b2 = 2.6  !allometric parameter for height calculation (to be a functional trait in next steps)
+
   integer(kind=i_4) :: ndmonth(12)       !Number of months
   data ndmonth /31,28,31,30,31,30,31,31,30,31,30,31/ !Number of days for each month
 

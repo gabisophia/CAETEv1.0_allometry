@@ -29,7 +29,7 @@ contains
        &,cfroot_ini,emaxm, tsoil, photo_pft,aresp_pft,npp_pft,lai_pft&
        &,clit_pft,csoil_pft, hresp_pft,rcm_pft,runom_pft,evapm_pft&
        &,wsoil_pft,rm_pft,rg_pft,cleaf_pft,cawood_pft,cfroot_pft&
-       &,grid_area,grid_area0,wue,cue,height_pft)
+       &,grid_area,grid_area0,wue,cue,height_pft,diam_pft)
     
     use types
     use global_pars
@@ -83,6 +83,8 @@ contains
     real(kind=r_4),dimension(q),intent(out) :: grid_area   ! gridcell area fraction of pfts!
     real(kind=r_4),dimension(q),intent(out) :: grid_area0   ! gridcell area fraction of pfts!
     real(kind=r_4),dimension(q),intent(out) :: height_pft   ! height (m)
+    real(kind=r_4),dimension(q),intent(out) :: diam_pft     ! diameter (m)
+
     !  c     --------------------------------E N D----------------------------
     
     !  c     ------------------------- internal variables---------------------
@@ -110,7 +112,7 @@ contains
     real(kind=r_4),dimension(q) :: emes,rmmes,rgmes,cuemes
     real(kind=r_4),dimension(q) :: cleafmes,cawoodmes,cfrootmes
     real(kind=r_4),dimension(q) :: gridocpmes,sm,wuemes
-    real(kind=r_4),dimension(q) :: hgtmes
+    real(kind=r_4),dimension(q) :: hgtmes,diammes
     real(kind=r_4) :: wsaux1 !auxiliar to check water equilibrium
     real(kind=r_4) :: dwww !auxiliar to check water equilibrium
     real(kind=r_4) :: pr,spre,ta,td,ipar,ru
@@ -149,6 +151,7 @@ contains
     cfroot_pft = 0.0 ! fine root biomass (KgC/m2)
     cfroot_pft = 0.0 ! fine root biomass (KgC/m2)
     height_pft  = 0.0 ! height(m)
+    diam_pft   = 0.0  ! diameter (m)
     grid_area  = 0.0 ! gridcell area fraction of pfts(%)
     
     wg0 = -1.0 !Soil water content in preceeding year integration
@@ -229,7 +232,7 @@ contains
          &,cleaf1_pft,cawood1_pft,cfroot1_pft ,wfim,gfim, sfim,smes&
          &,rmes,emes,epmes,phmes,armes,nppmes,laimes,clmes,csmes,hrmes&
          &,rcmes,rmmes,rgmes,cleafmes,cawoodmes,cfrootmes, gridocpmes&
-         &,wuemes,cuemes,hgtmes)
+         &,wuemes,cuemes,hgtmes,diammes)
     
     emaxm(k) = epmes
     do p=1,q

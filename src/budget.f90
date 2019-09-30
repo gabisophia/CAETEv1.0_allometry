@@ -28,7 +28,8 @@ contains
   subroutine budget (dt,month,w1,g1,s1,ts,temp,prec,p0,ipar,rh&
        &,cl1_pft,ca1_pft,cf1_pft,w2,g2,s2,smavg,ruavg,evavg,epavg&
        &,phavg,aravg,nppavg,laiavg,clavg,csavg,hravg,rcavg,rmavg,rgavg&
-       &,cleafavg_pft,cawoodavg_pft,cfrootavg_pft,ocpavg,wueavg,cueavg,hgtavg_pft)
+       &,cleafavg_pft,cawoodavg_pft,cfrootavg_pft,ocpavg,wueavg,cueavg,hgtavg_pft&
+       &,diamavg_pft)
     
     use types
     use global_pars
@@ -83,7 +84,8 @@ contains
     real(kind=r_4),intent(out),dimension(npft) :: cfrootavg_pft
     real(kind=r_4),intent(out),dimension(npft) :: ocpavg
     real(kind=r_4),intent(out),dimension(npft) :: wueavg,cueavg
-    real(kind=r_4),intent(out),dimension(npft) :: hgtavg_pft     !height of each pls
+    real(kind=r_4),intent(out),dimension(npft) :: hgtavg_pft     !height of each pls (m)
+    real(kind=r_4),intent(out),dimension(npft) :: diamavg_pft    !diameter of each pls (m)
     !     -----------------------Internal Variables------------------------
     integer(kind=i_4) :: p ,i
     
@@ -136,9 +138,10 @@ contains
     logical(kind=l_1) :: end_pls = .false., no_cell = .false.
     real(kind=r_4) :: ocp = 0
     real(kind=r_4) :: ae
-    real(kind=r_4) :: b1 !allometric parameter for Height calculation
-    real(kind=r_4) :: b2 !allometric parameter for Height calculation
-  
+    real(kind=r_4) :: b1 !allometric parameter for Height calculation - must be transformed in a variable functional trait in next steps
+    real(kind=r_4) :: b2 !allometric parameter for Height calculation - must be transformed in a variable functional trait in next steps
+    real(kind=r_4) :: pwood !wood density for diameter calculation - it will further be an equation dependent on P50 (kgCm-3)
+    real(kind=r_4) :: pi !for diameter calculation 
     !integer(kind=i_4),dimension(12) :: ndmonth       !Number of months
     !data ndmonth /31,28,31,30,31,30,31,31,30,31,30,31/ !Number of days for each month 
 
@@ -218,7 +221,7 @@ contains
        rg    = 0.0 
        wue   = 0.0
        cue   = 0.0
-       print*, "working"
+      
        
        !     Grid cell area fraction (%) ocp_coeffs(pft(1), pft(2), ...,pft(p))
        !     =================================================================     
@@ -237,13 +240,28 @@ contains
           ocp = ocp_coeffs(p)
           
           
-          b1=0.45
-          b2=2.6
+          b1=0.45 !put it into global f.90
+          b2=2.6  !put it into global f.90
           hgtavg_pft(p)= exp((log(cawoodavg_pft(p)*2*100) + b1)/b2) !equation from adgvm2 !(*2) is the convertion from
-                                        !carbon content for biomass. For now, we are just ignoring that our cawood is
+                                        !carbon content to biomass. For now, we are just ignoring that our cawood is
                                         !kgC/m2 and I multiplied by 100 because of the magnitude difference between
                                         !our values and the ones from adgvm2
-          print*, "hgt_pft", hgtavg_pft(p),cawoodavg_pft(p),ocp_coeffs(p)       
+         
+          
+          pwood=600.0 !put it into global f.90 (general number for first implementations)(kgCm-3)
+          pi=3.14159  !put it into globalf.90
+          diamavg_pft(p)= 2.0*(sqrt((cawoodavg_pft(p)*2.0*100.0)/(pi*pwood*hgtavg_pft(p)))) !equation from adgvm2 !(*2) is the 
+                                        !convertion from
+                                        !carbon content to biomass. For now, we are just ignoring that our cawood is
+                                        !kgC/m2 and I multiplied by 100 because of the magnitude difference between
+                                        !our values and the ones from adgvm2
+         if (hgtavg_pft(p).eq.0.0)then
+            diamavg_pft(p)=0.0
+         else
+            diamavg_pft(p)=diamavg_pft(p)
+         endif
+             
+         print*, "hgt_pft", hgtavg_pft(p),cawoodavg_pft(p),'diam_pft', diamavg_pft(p)
 
           call prod(dt1,OCP_WOOD(P),temp,ts,p0,w(p)&
                &,ipar,rh,emax,cl1(p),ca1(p),cf1(p),beta_leaf(p)&
