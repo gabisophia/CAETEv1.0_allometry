@@ -184,7 +184,7 @@ contains
        wueavg(p)  = 0.0
        cueavg(p)  = 0.0 
        ocp_mm(p)  = 0.0
-       hgtavg_pft(p) = 0.0
+
        
        alfa_leaf(p) = 1e-7
        alfa_awood(p) = 1e-7
@@ -234,9 +234,9 @@ contains
           dt1 = dt(:,p)
           ocp = ocp_coeffs(p)
           
-          hgtavg_pft(p)=exp((log(600.0) + 0.45)/2.6) !equation from adgvm2 (height=exp((log(stem_biomass)+b1)/b2),
+          hgtavg_pft(p)= exp((log(cawoodavg_pft(p)*100.0) + 0.45)/2.6) !equation from adgvm2 (height=exp((log(stem_biomass)+b1)/b2),
           !values used here just for testing purpose
-          print*, "hgt_pft", hgtavg_pft(p)          
+          print*, "hgt_pft", hgtavg_pft(p),cawoodavg_pft(p),ocp_coeffs(p)          
 
           call prod(dt1,OCP_WOOD(P),temp,ts,p0,w(p)&
                &,ipar,rh,emax,cl1(p),ca1(p),cf1(p),beta_leaf(p)&
