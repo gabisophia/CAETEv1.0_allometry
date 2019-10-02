@@ -29,7 +29,7 @@ contains
        &,cl1_pft,ca1_pft,cf1_pft,w2,g2,s2,smavg,ruavg,evavg,epavg&
        &,phavg,aravg,nppavg,laiavg,clavg,csavg,hravg,rcavg,rmavg,rgavg&
        &,cleafavg_pft,cawoodavg_pft,cfrootavg_pft,ocpavg,wueavg,cueavg,hgtavg_pft&
-       &,diamavg_pft,canradiusavg_pft)
+       &,diamavg_pft,canradiusavg_pft,canareaavg_pft)
     
     use types
     use global_pars
@@ -87,9 +87,11 @@ contains
     real(kind=r_4),intent(out),dimension(npft) :: hgtavg_pft     !height of each pls (m)
     real(kind=r_4),intent(out),dimension(npft) :: diamavg_pft    !diameter of each pls (m)
     real(kind=r_4),intent(out),dimension(npft) :: canradiusavg_pft    !canopy radius of each pls (unit????)
+    real(kind=r_4),intent(out),dimension(npft) :: canareaavg_pft !canopy area
 
     !     -----------------------Internal Variables------------------------
     integer(kind=i_4) :: p ,i
+    real(kind=r_4) :: sumarea 
     
     real(kind=r_4),dimension(npft) :: alfa_leaf, alfa_awood, alfa_froot
     real(kind=r_4),dimension(npft) :: beta_leaf, beta_awood, beta_froot
@@ -140,12 +142,7 @@ contains
     logical(kind=l_1) :: end_pls = .false., no_cell = .false.
     real(kind=r_4) :: ocp = 0
     real(kind=r_4) :: ae
-    real(kind=r_4) :: b1 !allometric parameter for Height calculation - must be transformed in a variable functional trait in next steps
-    real(kind=r_4) :: b2 !allometric parameter for Height calculation - must be transformed in a variable functional trait in next steps
-    real(kind=r_4) :: pwood !wood density for diameter calculation - it will further be an equation dependent on P50 (kgCm-3)
-    real(kind=r_4) :: pi !for diameter calculation 
-    !integer(kind=i_4),dimension(12) :: ndmonth       !Number of months
-    !data ndmonth /31,28,31,30,31,30,31,31,30,31,30,31/ !Number of days for each month 
+
 
 
     do p = 1,npft
@@ -156,6 +153,7 @@ contains
 
     tsnow = -1.0
     tice  = -2.5
+    sumarea = 0.0
     
     !     Precipitation
     !     =============     
@@ -242,33 +240,29 @@ contains
           ocp = ocp_coeffs(p)
           
           
-          b1=0.45 !put it into global f.90
-          b2=2.6  !put it into global f.90
-          hgtavg_pft(p)= exp((log(cawoodavg_pft(p)*2*100) + b1)/b2) !equation from adgvm2 !(*2) is the convertion from
-                                        !carbon content to biomass. For now, we are just ignoring that our cawood is
-                                        !kgC/m2 (considering only as kgC) and I multiplied by 100 because of the magnitude difference between
-                                        !our values and the ones from adgvm2
+           hgtavg_pft(p)=calc_height(ca1(p))
+
+            !print*,   hgtavg_pft(p), p     
          
-          
-          pwood=600.0 !put it into global f.90 (general number for first implementations)(kgCm-3)
-          pi=3.14159  !put it into globalf.90
-          diamavg_pft(p)= 2.0*(sqrt((cawoodavg_pft(p)*2.0*100.0)/(pi*pwood*hgtavg_pft(p)))) !equation from adgvm2 !(*2) is the 
-                                        !convertion from
-                                        !carbon content to biomass. For now, we are just ignoring that our cawood is
-                                        !kgC/m2 (considering only as kgC) and I multiplied by 100 because of the magnitude difference between
-                                        !our values and the ones from adgvm2
+                  
+          diamavg_pft(p)= calc_diam(hgtavg_pft(p),ca1(p))
+            !print*, diamavg_pft(p),p
 
          canradiusavg_pft(p) = 10.0*diamavg_pft(p) !equation from adgvm2 !just a simplification now         
+
+         canareaavg_pft(p)=(canradiusavg_pft(p)**2)*3.14
 
          if (hgtavg_pft(p).eq.0.0)then
             diamavg_pft(p)=0.0
             canradiusavg_pft(p)=0.0
-         else
-            diamavg_pft(p)=diamavg_pft(p)
-            canradiusavg_pft(p)=canradiusavg_pft(p)
+            canareaavg_pft(p)=0.0
          endif
+            
+           ! print*,"biomass",ca1(p),"height:",hgtavg_pft(p),"diam:",diamavg_pft(p),"radius",&
+            ! & canradiusavg_pft(p),"area",canareaavg_pft(p),p
+            
              
-         print*, "hgt_pft", hgtavg_pft(p),cawoodavg_pft(p),'diam_pft', diamavg_pft(p),'canradius_pft',canradiusavg_pft(p)
+        
 
           call prod(dt1,OCP_WOOD(P),temp,ts,p0,w(p)&
                &,ipar,rh,emax,cl1(p),ca1(p),cf1(p),beta_leaf(p)&
@@ -413,7 +407,13 @@ contains
              g2(p) = 0.0
              s2(p) = 0.0
            endif
-       enddo                  ! end pls loop  
+       enddo                  ! end pls loop
+
+     ! Sum of canopy areas
+     sumarea=sum(canareaavg_pft)
+        print*, "?????????????????????????????????????????????????sumarea", sumarea
+     ! What is the plot area
+      
     enddo                     ! end ndmonth loop
     
     !     Final calculations

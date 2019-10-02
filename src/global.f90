@@ -53,13 +53,15 @@ module global_pars
   real(kind=r_8),parameter :: ncf = (1.0/29.0)          !(gN/gC)
   real(kind=r_8),parameter :: ncs = (1.0/330.0)         !(gN/gC)
 
- ! real(kind=r_8),parameter :: b1 = 0.45 !allometric parameter for height calculation (to be a functional trait in next steps)
- ! real(kind=r_8),parameter :: b2 = 2.6  !allometric parameter for height calculation (to be a functional trait in next steps)
+  real(kind=r_4),parameter :: alom1 = 0.45 !allometric parameter for height calculation (to be a functional trait in next steps)
+  real(kind=r_4),parameter :: alom2 = 2.6  !allometric parameter for height calculation (to be a functional trait in next steps)
+  real(kind=r_4),parameter :: pwood=600.0 ! wood density(general number for first implementations)(kgCm-3)
+  real(kind=r_4),parameter :: pi=3.14159  !put it into globalf.90
 
   integer(kind=i_4) :: ndmonth(12)       !Number of months
   data ndmonth /31,28,31,30,31,30,31,31,30,31,30,31/ !Number of days for each month
 
-  integer(kind=i_4),parameter :: npls = 5
+  integer(kind=i_4),parameter :: npls = 3000
   integer(kind=i_4),parameter :: ntimes = 12
   integer(kind=i_4),parameter :: ntraits = 8
 

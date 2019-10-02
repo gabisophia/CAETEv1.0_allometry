@@ -14,8 +14,6 @@
 !     You should have received a copy of the GNU General Public License
 !     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-! contacts :: David Montenegro Lapola <lapoladm ( at ) gmail.com> 
-!             João Paulo Darela Filho <darelafilho ( at ) gmail.com>
 
 module photo
   
@@ -42,16 +40,71 @@ module photo
        pft_area_frac          ,& ! area fraction by biomass
        pft_par                ,& ! aux subroutine to read pls data
        pft_par2               ,&
-       spinup3                 ,&
+       spinup3                ,&
        spinup                 ,&
        ascii2bin              ,&
        ascii2bin2             ,&
        allocation             ,&
        test_dt                ,&
        water_ue               ,&
-       leap       
-contains
+       leap                   ,&
+       calc_height            ,&
+       calc_diam      
+   contains
 
+
+  !=================================================================
+  !=================================================================
+
+!it calculates height !equation from adgvm2 (Eq. 22 - Langan et al., 2017)  
+!(*2) is the convertion from carbon content to biomass
+!For now, we are just ignoring that our cawood is kgC/m2 (considering only as kgC) 
+!and I multiplied by 100 because of the magnitude difference between our values 
+!for carbon content and the ones from adgvm2
+   
+  function calc_height(awood_c) result(hgt) 
+  use types, only: r_4
+  use global_pars, only: alom1, alom2 !allometric parameters
+  implicit none
+
+  real(kind=r_4),intent(in) :: awood_c !carbon in abgwoody compartment (kgCm-2)   
+  real(kind=r_4) :: hgt
+
+  hgt=exp((log(awood_c*2) + alom1)/alom2) !! need to change the 100**** !!!!!!
+
+  if (awood_c.eq.0.0) then
+        hgt=0.0
+  else
+        hgt=hgt
+  endif
+
+  end function calc_height  
+  !=================================================================
+  !=================================================================
+!equation from adgvm2 !(*2) is the 
+                                        !convertion from
+                                        !carbon content to biomass. For now, we are just ignoring that our cawood is
+                                        !kgC/m2 (considering only as kgC) and I multiplied by 100 because of the magnitude !!!difference between
+                                        !our values and the ones from adgvm2   
+
+   function calc_diam(height,awood_c) result(diam) 
+   use types, only: r_4
+   use global_pars, only: pi, pwood !allometric parameters
+   implicit none
+
+   real(kind=r_4),intent(in) :: height !height (m)
+   real(kind=r_4),intent(in) :: awood_c !carbon in abgwoody compartment (kgCm-2)   
+   real(kind=r_4) :: diam
+
+     diam=2.0*(sqrt((awood_c*2.0)/(pi*pwood*height)))
+
+   if (awood_c.eq.0.0) then
+       diam=0.0
+  else
+       diam = diam
+  endif
+
+  end function calc_diam
   !=================================================================
   !=================================================================
 
@@ -1228,6 +1281,7 @@ contains
 end module photo
 
 ! =================-----------------==================----------------
+! ====================================================================
 
 module water
   
@@ -1250,7 +1304,6 @@ contains
   
   !=================================================================
   !=================================================================
-
   subroutine soil_temp_sub(temp, tsoil)
   ! Calcula a temperatura do solo. Aqui vamos mudar no futuro!
   ! a tsoil deve ter relacao com a et realizada...

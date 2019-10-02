@@ -29,7 +29,7 @@ contains
        &,cfroot_ini,emaxm, tsoil, photo_pft,aresp_pft,npp_pft,lai_pft&
        &,clit_pft,csoil_pft, hresp_pft,rcm_pft,runom_pft,evapm_pft&
        &,wsoil_pft,rm_pft,rg_pft,cleaf_pft,cawood_pft,cfroot_pft&
-       &,grid_area,grid_area0,wue,cue,height_pft,diam_pft,canradius_pft)
+       &,grid_area,grid_area0,wue,cue,height_pft,diam_pft,canradius_pft,canarea_pft)
     
     use types
     use global_pars
@@ -85,6 +85,7 @@ contains
     real(kind=r_4),dimension(q),intent(out) :: height_pft   ! height (m)
     real(kind=r_4),dimension(q),intent(out) :: diam_pft     ! diameter (m)
     real(kind=r_4),dimension(q),intent(out) :: canradius_pft ! canopy radius (unit????)
+     real(kind=r_4),dimension(q),intent(out) :: canarea_pft ! canopy area (unit????)
 
     !  c     --------------------------------E N D----------------------------
     
@@ -113,7 +114,7 @@ contains
     real(kind=r_4),dimension(q) :: emes,rmmes,rgmes,cuemes
     real(kind=r_4),dimension(q) :: cleafmes,cawoodmes,cfrootmes
     real(kind=r_4),dimension(q) :: gridocpmes,sm,wuemes
-    real(kind=r_4),dimension(q) :: hgtmes,diammes,canradiusmes
+    real(kind=r_4),dimension(q) :: hgtmes,diammes,canradiusmes,canareames
     real(kind=r_4) :: wsaux1 !auxiliar to check water equilibrium
     real(kind=r_4) :: dwww !auxiliar to check water equilibrium
     real(kind=r_4) :: pr,spre,ta,td,ipar,ru
@@ -153,7 +154,8 @@ contains
     cfroot_pft = 0.0 ! fine root biomass (KgC/m2)
     height_pft  = 0.0 ! height(m)
     diam_pft   = 0.0  ! diameter (m)
-    canradius_pft = 0.0 !canopy radius(m)
+    canradius_pft = 0.0 !canopy radius(???)
+    canarea_pft = 0.0 !canopy area (??)
     grid_area  = 0.0 ! gridcell area fraction of pfts(%)
     
     wg0 = -1.0 !Soil water content in preceeding year integration
@@ -231,12 +233,14 @@ contains
     hgtmes = 0.0
     diammes = 0.0
     canradiusmes = 0.0
+    canareames = 0.0
     
     call budget (dt,mes,wini,gini,sini,td,ta,pr,spre,ipar,ru&
          &,cleaf1_pft,cawood1_pft,cfroot1_pft ,wfim,gfim, sfim,smes&
          &,rmes,emes,epmes,phmes,armes,nppmes,laimes,clmes,csmes,hrmes&
          &,rcmes,rmmes,rgmes,cleafmes,cawoodmes,cfrootmes, gridocpmes&
-         &,wuemes,cuemes,hgtmes,diammes,canradiusmes)
+         &,wuemes,cuemes,hgtmes,diammes,canradiusmes,canareames)
+     
     
     emaxm(k) = epmes
     do p=1,q
@@ -274,7 +278,7 @@ contains
        cfroot_pft = cfrootmes
        grid_area  = gridocpmes
     endif 
-    
+       
     !     Check if equilibrium is attained
     !     --------------------------------
     if (k.eq.12) then
