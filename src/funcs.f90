@@ -49,13 +49,55 @@ module photo
        water_ue               ,&
        leap                   ,&
        calc_height            ,&
-       calc_diam      
+       calc_diam              ,&
+       calc_rad               ,&
+       calc_area             ! ,&
+       !light_dist
+       
    contains
 
 
   !=================================================================
   !=================================================================
+    !it calculates the availability of light according to the height
+    !of PLS   
+    ! subroutine light_dist(hgt,awood_c,leaf_c,froots_c,awood_aloc,&
+    !                      & canarea,light_avai)
+     !implicit none
+    ! use types, only r_4
+    ! use global_pars, only: npls
+    ! real(kind=r_4),dimension(npls),intent(in):: hgt, awood_c,leaf_c,&
+     !               & froots_c,awood_aloc,canarea
+     !real(kind=r_4),dimension(npls),intent(out):: light_avai
+     
+     !internal variables
+     !integer(kind=i_4) :: m
+     !real(kind=r_4) :: sumarea=0.0,surv=0.0
+     !integer(kind=i_4),dimension(1) :: max_hgt                  
+     !real(kind=i_4),dimension(npls) :: biomass,hgt_aux      
 
+    ! biomass=(awood_c+leaf_c+froots_c)
+    ! hgt_aux=hgt
+     !   print*,"ok"
+
+    ! do p=1,npls
+     !   if (awood_aloc(p).eq.0.0.and.(sum(biomass).eq.0.0)
+      !  else
+      !  surv=surv+1.0
+        
+       ! max_hgt=maxloc(hgt_aux)
+       ! m=max_hgt(1)
+       ! sumarea=sumarea+canarea(m)
+       
+       ! if (sumarea.ge.(sumarea/npft))then
+        ! go to 100
+        !continue
+         !   print*,"not complete"
+        !endif
+       ! hgt_aux(m)=0.0
+     !enddo
+  !=================================================================
+  !=================================================================
 !it calculates height !equation from adgvm2 (Eq. 22 - Langan et al., 2017)  
 !(*2) is the convertion from carbon content to biomass
 !For now, we are just ignoring that our cawood is kgC/m2 (considering only as kgC) 
@@ -107,6 +149,47 @@ module photo
   end function calc_diam
   !=================================================================
   !=================================================================
+   !equation from adgvm2 (Eq. 25 - Langan et al., 2017) !just a simplification now
+   !At the moment we are not considering the variable C2 (shape of canopy)
+
+  function calc_rad(diam) result(rad) 
+   use types, only: r_4
+   use global_pars, only: c1 !ratio between the canopy radius at the ground (z =0) and stem
+                             !diameter
+   implicit none
+
+   real(kind=r_4),intent(in) :: diam !height (m) 
+   real(kind=r_4) :: rad
+
+     rad=c1*diam
+
+   if (diam.eq.0.0) then
+       rad=0.0
+   endif
+
+  end function calc_rad
+    
+  !=================================================================
+  !=================================================================
+  !equation from adgvm2 (Eq. 25 - Langan et al., 2017)
+  function calc_area(rad) result(area) 
+   use types, only: r_4
+   use global_pars, only: pi
+   implicit none
+
+   real(kind=r_4),intent(in) :: rad !canopy radius (m) 
+   real(kind=r_4) :: area
+
+     area=(rad**2)*pi
+
+   if (rad.eq.0.0) then
+       area=0.0
+   endif
+
+  end function calc_area
+  !=================================================================
+  !=================================================================
+
 
   function gross_ph(f1,cleaf,sla) result(ph)
     ! Returns gross photosynthesis rate (kgC m-2 y-1) 

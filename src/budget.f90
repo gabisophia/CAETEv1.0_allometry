@@ -90,8 +90,10 @@ contains
     real(kind=r_4),intent(out),dimension(npft) :: canareaavg_pft !canopy area
 
     !     -----------------------Internal Variables------------------------
-    integer(kind=i_4) :: p ,i
-    real(kind=r_4) :: sumarea 
+    integer(kind=i_4) :: p ,i,m
+    real(kind=r_4) :: sumarea
+    
+    integer(kind=i_4),dimension(1) :: max_hgt 
     
     real(kind=r_4),dimension(npft) :: alfa_leaf, alfa_awood, alfa_froot
     real(kind=r_4),dimension(npft) :: beta_leaf, beta_awood, beta_froot
@@ -154,6 +156,7 @@ contains
     tsnow = -1.0
     tice  = -2.5
     sumarea = 0.0
+    max_hgt= 0.0
     
     !     Precipitation
     !     =============     
@@ -226,7 +229,11 @@ contains
        !     Grid cell area fraction (%) ocp_coeffs(pft(1), pft(2), ...,pft(p))
        !     =================================================================     
        call pft_area_frac(cl1, cf1, ca1, ocp_coeffs, ocp_wood) ! def in funcs.f90
-       
+        !call calc_alom
+       ! hgtavg_pft=15.0
+        !canareaavg_pft=30
+       !call light_dist(hgtavg_pft,ca1,cl1,cf1,dt(7,:),canareaavg_pft,ocp_wood)        
+        
        !     Maximum evapotranspiration   (emax)
        !     =================================
        ae = ipar * 2.18e5 !W m-2 Can use available energy
@@ -239,30 +246,23 @@ contains
           dt1 = dt(:,p)
           ocp = ocp_coeffs(p)
           
-          
-           hgtavg_pft(p)=calc_height(ca1(p))
-
-            !print*,   hgtavg_pft(p), p     
-         
+        ! Allometry (height, diameter, canopy area & etc)
+        !============================================   
+          hgtavg_pft(p)=calc_height(ca1(p))                 
                   
           diamavg_pft(p)= calc_diam(hgtavg_pft(p),ca1(p))
-            !print*, diamavg_pft(p),p
+         
+          canradiusavg_pft(p) = calc_rad(diamavg_pft(p))       
 
-         canradiusavg_pft(p) = 10.0*diamavg_pft(p) !equation from adgvm2 !just a simplification now         
+          canareaavg_pft(p)= calc_area(canradiusavg_pft(p))
 
-         canareaavg_pft(p)=(canradiusavg_pft(p)**2)*3.14
+             if (hgtavg_pft(p).eq.0.0)then
+                diamavg_pft(p)=0.0
+                canradiusavg_pft(p)=0.0
+                canareaavg_pft(p)=0.0
+             endif
 
-         if (hgtavg_pft(p).eq.0.0)then
-            diamavg_pft(p)=0.0
-            canradiusavg_pft(p)=0.0
-            canareaavg_pft(p)=0.0
-         endif
-            
-           ! print*,"biomass",ca1(p),"height:",hgtavg_pft(p),"diam:",diamavg_pft(p),"radius",&
-            ! & canradiusavg_pft(p),"area",canareaavg_pft(p),p
-            
-             
-        
+          !================================================
 
           call prod(dt1,OCP_WOOD(P),temp,ts,p0,w(p)&
                &,ipar,rh,emax,cl1(p),ca1(p),cf1(p),beta_leaf(p)&
@@ -408,10 +408,19 @@ contains
              s2(p) = 0.0
            endif
        enddo                  ! end pls loop
+     
+               
 
+
+
+
+
+       
+ !100     print*,max_hgt,hgtavg_pft(m),canareaavg_pft(m),sumarea
+     
      ! Sum of canopy areas
      sumarea=sum(canareaavg_pft)
-        print*, "?????????????????????????????????????????????????sumarea", sumarea
+       ! print*, "?????????????????????????????????????????????????sumarea", sumarea
      ! What is the plot area
       
     enddo                     ! end ndmonth loop

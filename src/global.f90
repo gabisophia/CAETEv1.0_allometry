@@ -56,12 +56,13 @@ module global_pars
   real(kind=r_4),parameter :: alom1 = 0.45 !allometric parameter for height calculation (to be a functional trait in next steps)
   real(kind=r_4),parameter :: alom2 = 2.6  !allometric parameter for height calculation (to be a functional trait in next steps)
   real(kind=r_4),parameter :: pwood=600.0 ! wood density(general number for first implementations)(kgCm-3)
-  real(kind=r_4),parameter :: pi=3.14159  !put it into globalf.90
+  real(kind=r_4),parameter :: pi=3.14159
+  real(kind=r_4),parameter :: c1=10.0 !parameter for the canopy radius equation (value from adgvm2 - Langan et al., 2017, Supl. Mat)  
 
   integer(kind=i_4) :: ndmonth(12)       !Number of months
   data ndmonth /31,28,31,30,31,30,31,31,30,31,30,31/ !Number of days for each month
 
-  integer(kind=i_4),parameter :: npls = 3000
+  integer(kind=i_4),parameter :: npls = 30
   integer(kind=i_4),parameter :: ntimes = 12
   integer(kind=i_4),parameter :: ntraits = 8
 

@@ -31,8 +31,9 @@ python module caete_module ! in
             real(kind=4), parameter,optional :: alom2=2.6
             real(kind=4), parameter,optional :: pwood=600.0
             real(kind=4), parameter,optional :: pi=3.14159
+            real(kind=4), parameter,optional :: c1=10.0
             integer(kind=4), optional,dimension(12) :: ndmonth=31
-            integer(kind=4), parameter,optional :: npls=3000
+            integer(kind=4), parameter,optional :: npls=30
             integer(kind=4), parameter,optional :: ntimes=12
             integer(kind=4), parameter,optional :: ntraits=8
             integer(kind=4), parameter,optional :: nx=720
@@ -87,6 +88,18 @@ python module caete_module ! in
                 real(kind=4) intent(in) :: awood_c
                 real(kind=4) :: diam
             end function calc_diam
+            function calc_rad(diam) result (rad) ! in :caete_module:funcs.f90:photo
+                use types, only: r_4
+                use global_pars, only: c1
+                real(kind=4) intent(in) :: diam
+                real(kind=4) :: rad
+            end function calc_rad
+            function calc_area(rad) result (area) ! in :caete_module:funcs.f90:photo
+                use types, only: r_4
+                use global_pars, only: pi
+                real(kind=4) intent(in) :: rad
+                real(kind=4) :: area
+            end function calc_area
             function gross_ph(f1,cleaf,sla) result (ph) ! in :caete_module:funcs.f90:photo
                 use types, only: r_4
                 real(kind=4) intent(in) :: f1
@@ -192,37 +205,37 @@ python module caete_module ! in
             subroutine pft_area_frac(cleaf1,cfroot1,cawood1,ocp_coeffs,ocp_wood) ! in :caete_module:funcs.f90:photo
                 use types, only: l_1,i_4,r_4
                 use global_pars, only: npls,cmin
-                real(kind=4) dimension(3000),intent(in) :: cleaf1
-                real(kind=4) dimension(3000),intent(in) :: cfroot1
-                real(kind=4) dimension(3000),intent(in) :: cawood1
-                real(kind=4) dimension(3000),intent(out) :: ocp_coeffs
-                logical(kind=4) dimension(3000),intent(out) :: ocp_wood
+                real(kind=4) dimension(30),intent(in) :: cleaf1
+                real(kind=4) dimension(30),intent(in) :: cfroot1
+                real(kind=4) dimension(30),intent(in) :: cawood1
+                real(kind=4) dimension(30),intent(out) :: ocp_coeffs
+                logical(kind=4) dimension(30),intent(out) :: ocp_wood
             end subroutine pft_area_frac
             subroutine pft_par(dt) ! in :caete_module:funcs.f90:photo
                 use types, only: r_4
                 use global_pars, only: ntraits,npls
-                real(kind=4) dimension(3000,8),intent(out) :: dt
+                real(kind=4) dimension(30,8),intent(out) :: dt
             end subroutine pft_par
             function pft_par2() result (dt) ! in :caete_module:funcs.f90:photo
                 use types, only: r_4
                 use global_pars, only: ntraits,npls
-                real(kind=4) dimension(8,3000) :: dt
+                real(kind=4) dimension(8,30) :: dt
             end function pft_par2
             function test_dt(dt,i) result (dt1) ! in :caete_module:funcs.f90:photo
                 use types, only: i_4,r_4
                 use global_pars, only: npls,ntraits
-                real(kind=4) dimension(8,3000),intent(in) :: dt
+                real(kind=4) dimension(8,30),intent(in) :: dt
                 integer(kind=4) intent(in) :: i
-                real(kind=4) dimension(3000) :: dt1
+                real(kind=4) dimension(30) :: dt1
             end function test_dt
             subroutine spinup(nppot,dt,cleafini,cfrootini,cawoodini) ! in :caete_module:funcs.f90:photo
                 use types
                 use global_pars, only: ntraits,npls
                 real(kind=4) intent(in) :: nppot
-                real(kind=4) dimension(8,3000),intent(in) :: dt
-                real(kind=4) dimension(3000),intent(out) :: cleafini
-                real(kind=4) dimension(3000),intent(out) :: cfrootini
-                real(kind=4) dimension(3000),intent(out) :: cawoodini
+                real(kind=4) dimension(8,30),intent(in) :: dt
+                real(kind=4) dimension(30),intent(out) :: cleafini
+                real(kind=4) dimension(30),intent(out) :: cfrootini
+                real(kind=4) dimension(30),intent(out) :: cawoodini
             end subroutine spinup
             subroutine spinup3(nppot,dt,cleafini,cfrootini,cawoodini) ! in :caete_module:funcs.f90:photo
                 use types
@@ -354,47 +367,47 @@ python module caete_module ! in
                 use photo
                 use water
                 use productivity
-                real(kind=4) dimension(8,3000),intent(in) :: dt
+                real(kind=4) dimension(8,30),intent(in) :: dt
                 integer(kind=4) intent(in) :: month
-                real(kind=4) dimension(3000),intent(in) :: w1
-                real(kind=4) dimension(3000),intent(in) :: g1
-                real(kind=4) dimension(3000),intent(in) :: s1
+                real(kind=4) dimension(30),intent(in) :: w1
+                real(kind=4) dimension(30),intent(in) :: g1
+                real(kind=4) dimension(30),intent(in) :: s1
                 real(kind=4) intent(in) :: ts
                 real(kind=4) intent(in) :: temp
                 real(kind=4) intent(in) :: prec
                 real(kind=4) intent(in) :: p0
                 real(kind=4) intent(in) :: ipar
                 real(kind=4) intent(in) :: rh
-                real(kind=4) dimension(3000),intent(inout) :: cl1_pft
-                real(kind=4) dimension(3000),intent(inout) :: ca1_pft
-                real(kind=4) dimension(3000),intent(inout) :: cf1_pft
-                real(kind=4) dimension(3000),intent(out) :: w2
-                real(kind=4) dimension(3000),intent(out) :: g2
-                real(kind=4) dimension(3000),intent(out) :: s2
-                real(kind=4) dimension(3000),intent(out) :: smavg
-                real(kind=4) dimension(3000),intent(out) :: ruavg
-                real(kind=4) dimension(3000),intent(out) :: evavg
+                real(kind=4) dimension(30),intent(inout) :: cl1_pft
+                real(kind=4) dimension(30),intent(inout) :: ca1_pft
+                real(kind=4) dimension(30),intent(inout) :: cf1_pft
+                real(kind=4) dimension(30),intent(out) :: w2
+                real(kind=4) dimension(30),intent(out) :: g2
+                real(kind=4) dimension(30),intent(out) :: s2
+                real(kind=4) dimension(30),intent(out) :: smavg
+                real(kind=4) dimension(30),intent(out) :: ruavg
+                real(kind=4) dimension(30),intent(out) :: evavg
                 real(kind=4) intent(out) :: epavg
-                real(kind=4) dimension(3000),intent(out) :: phavg
-                real(kind=4) dimension(3000),intent(out) :: aravg
-                real(kind=4) dimension(3000),intent(out) :: nppavg
-                real(kind=4) dimension(3000),intent(out) :: laiavg
-                real(kind=4) dimension(3000),intent(out) :: clavg
-                real(kind=4) dimension(3000),intent(out) :: csavg
-                real(kind=4) dimension(3000),intent(out) :: hravg
-                real(kind=4) dimension(3000),intent(out) :: rcavg
-                real(kind=4) dimension(3000),intent(out) :: rmavg
-                real(kind=4) dimension(3000),intent(out) :: rgavg
-                real(kind=4) dimension(3000),intent(out) :: cleafavg_pft
-                real(kind=4) dimension(3000),intent(out) :: cawoodavg_pft
-                real(kind=4) dimension(3000),intent(out) :: cfrootavg_pft
-                real(kind=4) dimension(3000),intent(out) :: ocpavg
-                real(kind=4) dimension(3000),intent(out) :: wueavg
-                real(kind=4) dimension(3000),intent(out) :: cueavg
-                real(kind=4) dimension(3000),intent(out) :: hgtavg_pft
-                real(kind=4) dimension(3000),intent(out) :: diamavg_pft
-                real(kind=4) dimension(3000),intent(out) :: canradiusavg_pft
-                real(kind=4) dimension(3000),intent(out) :: canareaavg_pft
+                real(kind=4) dimension(30),intent(out) :: phavg
+                real(kind=4) dimension(30),intent(out) :: aravg
+                real(kind=4) dimension(30),intent(out) :: nppavg
+                real(kind=4) dimension(30),intent(out) :: laiavg
+                real(kind=4) dimension(30),intent(out) :: clavg
+                real(kind=4) dimension(30),intent(out) :: csavg
+                real(kind=4) dimension(30),intent(out) :: hravg
+                real(kind=4) dimension(30),intent(out) :: rcavg
+                real(kind=4) dimension(30),intent(out) :: rmavg
+                real(kind=4) dimension(30),intent(out) :: rgavg
+                real(kind=4) dimension(30),intent(out) :: cleafavg_pft
+                real(kind=4) dimension(30),intent(out) :: cawoodavg_pft
+                real(kind=4) dimension(30),intent(out) :: cfrootavg_pft
+                real(kind=4) dimension(30),intent(out) :: ocpavg
+                real(kind=4) dimension(30),intent(out) :: wueavg
+                real(kind=4) dimension(30),intent(out) :: cueavg
+                real(kind=4) dimension(30),intent(out) :: hgtavg_pft
+                real(kind=4) dimension(30),intent(out) :: diamavg_pft
+                real(kind=4) dimension(30),intent(out) :: canradiusavg_pft
+                real(kind=4) dimension(30),intent(out) :: canareaavg_pft
             end subroutine budget
         end module budget_caete
         module water_balance ! in :caete_module:water_balance.f90
@@ -404,41 +417,41 @@ python module caete_module ! in
                 use budget_caete
                 use water, only: soil_temp_sub
                 use photo, only: pft_area_frac
-                real(kind=4) dimension(8,3000),intent(in) :: dt
+                real(kind=4) dimension(8,30),intent(in) :: dt
                 real(kind=4) dimension(12),intent(in) :: prec
                 real(kind=4) dimension(12),intent(in) :: temp
                 real(kind=4) dimension(12),intent(in) :: p0
                 real(kind=4) dimension(12),intent(in) :: par
                 real(kind=4) dimension(12),intent(in) :: rhs
-                real(kind=4) dimension(3000),intent(in) :: cleaf_ini
-                real(kind=4) dimension(3000),intent(in) :: cawood_ini
-                real(kind=4) dimension(3000),intent(in) :: cfroot_ini
+                real(kind=4) dimension(30),intent(in) :: cleaf_ini
+                real(kind=4) dimension(30),intent(in) :: cawood_ini
+                real(kind=4) dimension(30),intent(in) :: cfroot_ini
                 real(kind=4) dimension(12),intent(out) :: emaxm
                 real(kind=4) dimension(12),intent(out) :: tsoil
-                real(kind=4) dimension(3000,12),intent(out) :: photo_pft
-                real(kind=4) dimension(3000,12),intent(out) :: aresp_pft
-                real(kind=4) dimension(3000,12),intent(out) :: npp_pft
-                real(kind=4) dimension(3000,12),intent(out) :: lai_pft
-                real(kind=4) dimension(3000,12),intent(out) :: clit_pft
-                real(kind=4) dimension(3000,12),intent(out) :: csoil_pft
-                real(kind=4) dimension(3000,12),intent(out) :: hresp_pft
-                real(kind=4) dimension(3000,12),intent(out) :: rcm_pft
-                real(kind=4) dimension(3000,12),intent(out) :: runom_pft
-                real(kind=4) dimension(3000,12),intent(out) :: evapm_pft
-                real(kind=4) dimension(3000,12),intent(out) :: wsoil_pft
-                real(kind=4) dimension(3000,12),intent(out) :: rm_pft
-                real(kind=4) dimension(3000,12),intent(out) :: rg_pft
-                real(kind=4) dimension(3000),intent(out) :: cleaf_pft
-                real(kind=4) dimension(3000),intent(out) :: cawood_pft
-                real(kind=4) dimension(3000),intent(out) :: cfroot_pft
-                real(kind=4) dimension(3000),intent(out) :: grid_area
-                real(kind=4) dimension(3000),intent(out) :: grid_area0
-                real(kind=4) dimension(3000,12),intent(out) :: wue
-                real(kind=4) dimension(3000,12),intent(out) :: cue
-                real(kind=4) dimension(3000),intent(out) :: height_pft
-                real(kind=4) dimension(3000),intent(out) :: diam_pft
-                real(kind=4) dimension(3000),intent(out) :: canradius_pft
-                real(kind=4) dimension(3000),intent(out) :: canarea_pft
+                real(kind=4) dimension(30,12),intent(out) :: photo_pft
+                real(kind=4) dimension(30,12),intent(out) :: aresp_pft
+                real(kind=4) dimension(30,12),intent(out) :: npp_pft
+                real(kind=4) dimension(30,12),intent(out) :: lai_pft
+                real(kind=4) dimension(30,12),intent(out) :: clit_pft
+                real(kind=4) dimension(30,12),intent(out) :: csoil_pft
+                real(kind=4) dimension(30,12),intent(out) :: hresp_pft
+                real(kind=4) dimension(30,12),intent(out) :: rcm_pft
+                real(kind=4) dimension(30,12),intent(out) :: runom_pft
+                real(kind=4) dimension(30,12),intent(out) :: evapm_pft
+                real(kind=4) dimension(30,12),intent(out) :: wsoil_pft
+                real(kind=4) dimension(30,12),intent(out) :: rm_pft
+                real(kind=4) dimension(30,12),intent(out) :: rg_pft
+                real(kind=4) dimension(30),intent(out) :: cleaf_pft
+                real(kind=4) dimension(30),intent(out) :: cawood_pft
+                real(kind=4) dimension(30),intent(out) :: cfroot_pft
+                real(kind=4) dimension(30),intent(out) :: grid_area
+                real(kind=4) dimension(30),intent(out) :: grid_area0
+                real(kind=4) dimension(30,12),intent(out) :: wue
+                real(kind=4) dimension(30,12),intent(out) :: cue
+                real(kind=4) dimension(30),intent(out) :: height_pft
+                real(kind=4) dimension(30),intent(out) :: diam_pft
+                real(kind=4) dimension(30),intent(out) :: canradius_pft
+                real(kind=4) dimension(30),intent(out) :: canarea_pft
             end subroutine wbm
         end module water_balance
     end interface 
