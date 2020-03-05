@@ -47,6 +47,18 @@ height = []
 #creates an empty list to receive the height values for each PLS 
 LAI_pls_list = [] #creates an empty list to receive the LAI values for each PLS
 
+##creates an empty list to receive the crown area values for each PLS
+Crown_area_list=[]
+
+###creates an empty list to receive the FPC for each PLS
+FPC_pls_list=[]
+
+#creates an empty list to receive the ~number of individuals per PLS
+Nind_pls_list = []
+
+##creates an empty list to receive the diameter PLS
+Diameter_list=[]
+
 #Following list with values for testing the code logic
 wood_density = [0.35]
 carbon_stem = [5,12,10,11,7,8] 
@@ -60,7 +72,10 @@ for dwood in wood_density:
             for SLA in specif_leaf_area:
 
                 #D: diameter (m) (Smith et al 2001 - SP material)
-                D = ((4+(Cstem))/((dwood)*3.14*40))**(1/(2+0.5)) 
+                D = ((4+(Cstem))/((dwood)*3.14*40))**(1/(2+0.5))
+
+                #allocates diameter values for each PLS
+                Diameter_list.append(D) 
 
                 #LA: leaf area (m2) (Seiler et al., 2014 (eq. 4))
                 LA = Cleaf*SLA
@@ -77,6 +92,9 @@ for dwood in wood_density:
                 #CA: crown area (m2) (Sitch et al., 2003)
                 CA = k_allom1*(D**krp)
 
+                #allocates crown area values
+                Crown_area_list.append(CA)
+
                 #LAI_pls: leaf area index of a PLS (unitless)(Sitch et al., 2003)
                 LAI_pls = (Cleaf*SLA)/CA
 
@@ -88,9 +106,23 @@ for dwood in wood_density:
                 
                 #APAR= absorbed photosynthetically active radiation (Smith et al. 2001,thesis). 
                 APAR = 0.5*rad*light_extinction
+
+                #calculates individual foliage projective cover (FPC_pls) (unitless)(Sitch et al., 2003) 
+                FPC_pls=1-m.exp(-light_ext_factor*LAI_pls)
                 
+                #allocates heights values for calculating layers and PAR
+                FPC_pls_list.append(FPC_pls)
 
+                #calculates the number of individuals per PLS (Smith, 2001, thesis)
+                Nind = D**(-1.6)
 
+                #allocates number of individuals per PLS
+                Nind_pls_list.append(Nind)
+
+                #calculates the fractional projective cover in a grid cell (Sitch et al., 2003)
+                FPC_gc=D*Nind*FPC_pls
+
+       
 #empty list for receive the size of all layers
 size_layer_list=[] 
 
@@ -114,6 +146,12 @@ while size_layer_counting < max_height:
     size_layer_list.append(size_layer_counting)           
 
 
+
+
+
+
+
+
 #ainda não entendemos os dois blocos seguintes 
 #creates an empty list for receiving the layer identification of a PLS
 layer_id = []
@@ -131,18 +169,14 @@ for i in range(len(layer_id), 0, -1):
 	else:
 		received_sun[i - 1] = received_sun[i] * 0.8
 	
-print(received_sun)
 
 
 
 
 
-#FPC_pls: foliage projective cover for a PLS (Sitch et al., 2003)
-
-#FPC_pls_gc: overall fractional coverage of a PLS in a grid cell (Sitch et al., 2003)
 
 
-#nind: number of individuals derived from diameter (selfithing law)    
+   
 
 
 
