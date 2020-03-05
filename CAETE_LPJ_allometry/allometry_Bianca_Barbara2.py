@@ -1,7 +1,7 @@
 import math as m
 
 #1st trying for implementing LPJ allometric equations
-#Code developed by Bianca Rius, Bárbara Cardelli, Caio Fascina and David Lapola (02/2020)
+#Code developed by Bianca Rius, Bárbara Cardelli, Caio Fascina and David Lapola #(02/2020)
 
 #SLA: specific leaf area (m2/kgC) (will be a variant trait). The following value is for tersting purpose.
 SLA = 21.7
