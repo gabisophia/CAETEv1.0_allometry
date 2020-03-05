@@ -48,8 +48,8 @@ height = []
 LAI_pls_list = [] #creates an empty list to receive the LAI values for each PLS
 
 #Following list with values for testing the code logic
-wood_density = [0.35, 0.5]
-carbon_stem = [5] 
+wood_density = [0.35]
+carbon_stem = [5,12,10,11,7,8] 
 carbon_leaf = [0.2]
 specif_leaf_area = [20.3]
 
@@ -113,23 +113,25 @@ while size_layer_counting < max_height:
     size_layer_counting = size_layer_counting + layer_size
     size_layer_list.append(size_layer_counting)           
 
-#desconsider for now:
-###
-#camada = []
-#for x in range(len(height)):
-#	for y in range(len(layer_number)):
-#		if height[x] <= layer_number[y]:
-#			camada.append(y + 1)
 
-#received_sun = [x for x in range(len(camada))]
-#max_sun = 100
-#for i in range(len(camada), 0, -1):
-#	if i == len(camada):
-#		received_sun[i - 1] = max_sun
-#	else:
-#		received_sun[i - 1] = received_sun[i] * 0.8
+#ainda não entendemos os dois blocos seguintes 
+#creates an empty list for receiving the layer identification of a PLS
+layer_id = []
+for height_pls in range(len(height)):
+	for layer_size_pls in range(len(size_layer_list)):
+		if height[height_pls] <= size_layer_list[layer_size_pls]:
+			layer_id.append(layer_size_pls + 1)
+
+
+received_sun = [x for x in range(len(layer_id))]
+max_sun = 100
+for i in range(len(layer_id), 0, -1):
+	if i == len(layer_id):
+		received_sun[i - 1] = max_sun
+	else:
+		received_sun[i - 1] = received_sun[i] * 0.8
 	
-#print(received_sun)
+print(received_sun)
 
 
 
