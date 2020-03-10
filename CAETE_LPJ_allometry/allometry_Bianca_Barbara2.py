@@ -1,23 +1,12 @@
+# LPJ allometric equations
+
 import math as m
 
-#1st trying for implementing LPJ allometric equations
-#Code developed by Bianca Rius, Bárbara Cardelli, Caio Fascina and David Lapola (02/2020)
-
-#SLA: specific leaf area (m2/kgC) (will be a variant trait). The following value is for tersting purpose.
-SLA = 21.7
-
-#Cleaf: carbon on leaves compartments (kgC/m2). The following value is for tersting purpose.
-Cleaf = 0.3 
-
-#kla_sa: is a constant equal to 8000 (unitless) (Table 3 in Sitch et al., 2003)
-kla_sa = 8000 
-
-#P50: xylem tension at which 50% of hydraulic conductivity was lost (MPa). The following value is for tersting purpose.
-P50 = -1.5 
-
-#Cstem: carbon on stem (kgC/m2) (it is actually Csapwood +Cheartwood, but for now, a general value will be used.
-#The following value is for tersting purpose.
-Cstem = 12 
+SLA = 21.7 # Specific leaf area (m2/kgC), it will be a variant trait.
+Cleaf = 0.3 # Carbon on leaves compartments (kgC/m2). 
+kla_sa = 8000 # Constant equal to 8000 (unitless) / Table 3 in Sitch et al., 2003.
+P50 = -1.5 # xylem tension at which 50% of hydraulic conductivity was lost (MPa). 
+Cstem = 12 # Carbon on stem (kgC/m2) (it is actually Csapwood + Cheartwood, but for now, a general value will be used).
 
 #k_allom1: allometric constant equal to 100 (Table 3 Sitch et al., 2003)
 k_allom1 = 100
@@ -71,67 +60,67 @@ specif_leaf_area = [20.3]
 
 
 for dwood in wood_density:
-    for Cstem in carbon_stem:
-        for Cleaf in carbon_leaf:
-            for SLA in specif_leaf_area:
+	for Cstem in carbon_stem:
+		for Cleaf in carbon_leaf:
+			for SLA in specif_leaf_area:
 
-                #D: diameter (m) (Smith et al 2001 - SP material)
-                D = ((4+(Cstem))/((dwood)*3.14*40))**(1/(2+0.5))
+				#D: diameter (m) (Smith et al 2001 - SP material)
+				D = ((4+(Cstem))/((dwood)*3.14*40))**(1/(2+0.5))
 
-                #allocates diameter values for each PLS
-                Diameter_list.append(D) 
+				#allocates diameter values for each PLS
+				Diameter_list.append(D) 
 
-                #LA: leaf area (m2) (Seiler et al., 2014 (eq. 4))
-                LA = Cleaf*SLA
+				#LA: leaf area (m2) (Seiler et al., 2014 (eq. 4))
+				LA = Cleaf*SLA
 
-                #SA:  sapwood cross sectional area (m2) (Sitch et al., 2003)
-                SA = LA/kla_sa
-                
-                #H: height (m) (Sitch et al., 2003)
-                H = k_allom2*(D**k_allom3)
+				#SA:  sapwood cross sectional area (m2) (Sitch et al., 2003)
+				SA = LA/kla_sa
+				
+				#H: height (m) (Sitch et al., 2003)
+				H = k_allom2*(D**k_allom3)
 
-                #allocates heights values for calculating layers and PAR
-                height.append(H)
+				#allocates heights values for calculating layers and PAR
+				height.append(H)
 
-                #CA: crown area (m2) (Sitch et al., 2003)
-                CA = k_allom1*(D**krp)
+				#CA: crown area (m2) (Sitch et al., 2003)
+				CA = k_allom1*(D**krp)
 
-                #allocates crown area values
-                Crown_area_list.append(CA)
+				#allocates crown area values
+				Crown_area_list.append(CA)
 
-                #LAI_pls: leaf area index of a PLS (unitless)(Sitch et al., 2003)
-                LAI_pls = (Cleaf*SLA)/CA
+				#LAI_pls: leaf area index of a PLS (unitless)(Sitch et al., 2003)
+				LAI_pls = (Cleaf*SLA)/CA
 
-                #allocates LAI for each PLS values for calculating layers and PAR
-                LAI_pls_list.append(LAI_pls)
+				#allocates LAI for each PLS values for calculating layers and PAR
+				LAI_pls_list.append(LAI_pls)
 
-                #calculates how much of the light will be extincted accordin to the LAI_pls
-                light_extinction = 1-m.exp(-light_ext_factor*LAI_pls)
-                
-                #APAR= absorbed photosynthetically active radiation (Smith et al. 2001,thesis). 
-                APAR = 0.5*rad*light_extinction
+				#calculates how much of the light will be extincted accordin to the LAI_pls
+				light_extinction = 1-m.exp(-light_ext_factor*LAI_pls)
+				
+				#APAR= absorbed photosynthetically active radiation (Smith et al. 2001,thesis). 
+				APAR = 0.5*rad*light_extinction
 
-                #calculates individual foliage projective cover (FPC_pls) (unitless)(Sitch et al., 2003) 
-                FPC_pls=1-m.exp(-light_ext_factor*LAI_pls)
-                
-                #allocates heights values for calculating layers and PAR
-                FPC_pls_list.append(FPC_pls)
+				#calculates individual foliage projective cover (FPC_pls) (unitless)(Sitch et al., 2003) 
+				FPC_pls=1-m.exp(-light_ext_factor*LAI_pls)
+				
+				#allocates heights values for calculating layers and PAR
+				FPC_pls_list.append(FPC_pls)
 
-                #calculates the number of individuals per PLS (Smith, 2001, thesis)
-                Nind = D**(-1.6)
+				#calculates the number of individuals per PLS (Smith, 2001, thesis)
+				Nind = D**(-1.6)
 
-                #allocates number of individuals per PLS
-                Nind_pls_list.append(Nind)
+				#allocates number of individuals per PLS
+				Nind_pls_list.append(Nind)
 
-                #calculates the fractional projective cover in a grid cell (Sitch et al., 2003)
-                FPC_gc = D*Nind*FPC_pls
+				#calculates the fractional projective cover in a grid cell (Sitch et al., 2003)
+				FPC_gc = D*Nind*FPC_pls
 
 
-                #Calculating total grid cell FPC
-                FPC_gc_total = FPC_gc_total+FPC_gc
-    
+				#Calculating total grid cell FPC
+				FPC_gc_total = FPC_gc_total+FPC_gc
+	
 #empty list for receive the size of all layers
-size_layer_list=[] 
+size_layer_list = [] 
 
 #found the heighest PLS in a grid cell
 max_height = max(height)
@@ -149,30 +138,56 @@ layer_size = max_height / num_layer
 size_layer_counting = 0
 
 while size_layer_counting < max_height:
-    size_layer_counting = size_layer_counting + layer_size
-    size_layer_list.append(size_layer_counting)           
+	size_layer_counting = size_layer_counting + layer_size
+	size_layer_list.append(size_layer_counting)
 
-#ainda não entendemos os dois blocos seguintes 
-#creates an empty list for receiving the layer identification of a PLS
+
 layer_id = []
 
-for height_pls in range(len(height)): #determines the range of values since it will be variable
-	for layer_size_pls in range(len(size_layer_list)):
-		if height[height_pls] <= size_layer_list[layer_size_pls]: #determines in which layer each pls is loccated
-			layer_id.append(layer_size_pls + 1) # +1 because python starts in 0
+# Determines the range of values since it will be variable
+for height_value in range(len(height)):
 
-            
-received_sun = [x for x in range(len(layer_id))]
-max_sun = 100
-for i in range(len(layer_id), 0, -1):
-	if i == len(layer_id):
-		received_sun[i - 1] = max_sun
-	else:
-		received_sun[i - 1] = received_sun[i] * 0.8
+	for layer_idx, layer_value in enumerate(range(len(size_layer_list))):
+		# determines in which layer each pls is loccated
+		if height[height_value] <= size_layer_list[layer_value]:
+			layer_id.append(layer_idx)
+			break
+
+###########################################
+# import pandas as pd
+
+# data = {
+#     "height": pd.Series(height),
+#     "layer_id": pd.Series(layer_id),
+#     "LAI_pls_list": pd.Series(LAI_pls_list)}
+# data_frame = pd.DataFrame(data)
+# print(data_frame)
+
+
+# def received_light(current_light, current_lai):
+# 	light_applyied = current_light - LAI_pls_list[current_light + 1]
 	
+# 	return light_applyied * total_sun * pow(1 - e, (0.5 * lai))
+
+max_sun = 100
+received_sun = []
 
 
+for idx, value in enumerate(sorted(LAI_pls_list, reverse = True)):
+	for layer in sorted(layer_id, reverse = True):
+		if idx == layer:
+			print(f"Layer: {layer} / LAI: {value}", end = "")
+			print("Aplicar")
+			break
 
+
+# 	if i == len(layer_id):
+# 		received_sun[i - 1] = max_sun
+# 	else:
+# 		received_sun[i - 1] = received_sun[i] * 0.8
+
+
+# print(received_sun)
 
 
 
@@ -182,7 +197,7 @@ for i in range(len(layer_id), 0, -1):
 
 
 
-           
-               
+		   
+			   
 
 
