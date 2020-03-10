@@ -59,9 +59,13 @@ Nind_pls_list = []
 ##creates an empty list to receive the diameter PLS
 Diameter_list=[]
 
+
+#initializing the counter for the total grid cell FPC
+FPC_gc_total = 0
+
 #Following list with values for testing the code logic
-wood_density = [0.35]
-carbon_stem = [5,12,10,11,7,8] 
+wood_density = [0.25]
+carbon_stem = [0.5,1,6,10,11,7,8] 
 carbon_leaf = [0.2]
 specif_leaf_area = [20.3]
 
@@ -120,9 +124,12 @@ for dwood in wood_density:
                 Nind_pls_list.append(Nind)
 
                 #calculates the fractional projective cover in a grid cell (Sitch et al., 2003)
-                FPC_gc=D*Nind*FPC_pls
+                FPC_gc = D*Nind*FPC_pls
 
-       
+
+                #Calculating total grid cell FPC
+                FPC_gc_total = FPC_gc_total+FPC_gc
+    
 #empty list for receive the size of all layers
 size_layer_list=[] 
 
@@ -145,22 +152,16 @@ while size_layer_counting < max_height:
     size_layer_counting = size_layer_counting + layer_size
     size_layer_list.append(size_layer_counting)           
 
-
-
-
-
-
-
-
 #ainda não entendemos os dois blocos seguintes 
 #creates an empty list for receiving the layer identification of a PLS
 layer_id = []
-for height_pls in range(len(height)):
+
+for height_pls in range(len(height)): #determines the range of values since it will be variable
 	for layer_size_pls in range(len(size_layer_list)):
-		if height[height_pls] <= size_layer_list[layer_size_pls]:
-			layer_id.append(layer_size_pls + 1)
+		if height[height_pls] <= size_layer_list[layer_size_pls]: #determines in which layer each pls is loccated
+			layer_id.append(layer_size_pls + 1) # +1 because python starts in 0
 
-
+            
 received_sun = [x for x in range(len(layer_id))]
 max_sun = 100
 for i in range(len(layer_id), 0, -1):
