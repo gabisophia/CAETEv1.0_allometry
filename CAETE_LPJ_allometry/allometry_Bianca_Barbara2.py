@@ -53,10 +53,10 @@ Diameter_list=[]
 FPC_gc_total = 0
 
 #Following list with values for testing the code logic
-wood_density = [0.25]
-carbon_stem = [0.5,1,6,10,11,7,8] 
-carbon_leaf = [0.2]
-specif_leaf_area = [20.3]
+wood_density = [0.35]
+carbon_stem = [1,2,5,10,11] 
+carbon_leaf = [0.3]
+specif_leaf_area = [22.3]
 
 
 for dwood in wood_density:
@@ -118,7 +118,8 @@ for dwood in wood_density:
 
 				#Calculating total grid cell FPC
 				FPC_gc_total = FPC_gc_total+FPC_gc
-	
+print(height)
+
 #empty list for receive the size of all layers
 size_layer_list = [] 
 
@@ -169,15 +170,32 @@ for height_value in range(len(height)):
 	
 # 	return light_applyied * total_sun * pow(1 - e, (0.5 * lai))
 
+########################################
+#testing receiving sun logic###
 max_sun = 100
-received_sun = []
+received_sun = 0
+list_test=[]
+
+y=max(layer_id)
+highest_layer=0
+
+l=[height, LAI_pls_list, layer_id]
+for x in l[2]:
+	if x == y:
+		received_sun=max_sun
+
+	else:
+		received_sun=100-50
+#################################
+
 
 
 for idx, value in enumerate(sorted(LAI_pls_list, reverse = True)):
 	for layer in sorted(layer_id, reverse = True):
 		if idx == layer:
-			print(f"Layer: {layer} / LAI: {value}", end = "")
-			print("Aplicar")
+			#print(f"Layer: {layer} / LAI: {value}", end = "")
+			#print("Aplicar")
+
 			break
 
 
