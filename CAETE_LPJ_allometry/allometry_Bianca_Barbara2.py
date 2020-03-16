@@ -118,7 +118,7 @@ for dwood in wood_density:
 
 				#Calculating total grid cell FPC
 				FPC_gc_total = FPC_gc_total+FPC_gc
-print(height)
+print(LAI_pls_list)
 
 #empty list for receive the size of all layers
 size_layer_list = [] 
@@ -173,19 +173,18 @@ for height_value in range(len(height)):
 ########################################
 #testing receiving sun logic###
 max_sun = 100
-received_sun = 0
-list_test=[]
-
+sun=[]
 y=max(layer_id)
-highest_layer=0
-
-l=[height, LAI_pls_list, layer_id]
-for x in l[2]:
-	if x == y:
-		received_sun=max_sun
-
+list_var=zip(layer_id,height,LAI_pls_list)
+for i in list_var:
+	if i[0]==y:
+		received_sun=max_sun*(1-m.exp(-0.5*i[2]))
 	else:
-		received_sun=100-50
+		received_sun=max_sun-20
+	sun.append(received_sun)
+
+print(sun)
+
 #################################
 
 

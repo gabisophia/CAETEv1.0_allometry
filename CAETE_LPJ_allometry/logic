@@ -1,0 +1,165 @@
+ibianca@bianca-lenovo-ideapad-330S:~/CAETE_allometry/CAETEv1.0_allometry/CAETE_LJ_allometry$ ipython3
+Python 3.6.9 (default, Nov  7 2019, 10:44:02) 
+Type "copyright", "credits" or "license" for more information.
+
+IPython 5.5.0 -- An enhanced Interactive Python.
+?         -> Introduction and overview of IPython's features.
+%quickref -> Quick reference.
+help      -> Python's own help system.
+object?   -> Details about 'object', use 'object??' for extra details.
+
+In [1]: l1 = ['a','b','c'] 
+
+In [2]: l2 = [1,2,3]
+
+In [3]: for i,x in enumerate(l1):
+   ...:     print(i,x)
+   ...:     
+0 a
+1 b
+2 c
+
+In [4]: for i,x in enumerate(l1):
+   ...:     print(l2[i],x)
+   ...:     
+1 a
+2 b
+3 c
+
+In [5]: for x in range(len(l1)):
+   ...:     print(l1[x], l2[x])
+   ...:     
+a 1
+b 2
+c 3
+
+In [6]: zip(l1, l2)
+Out[6]: <zip at 0x7f6ff8e973c8>
+
+In [7]: a = zip(l1, l2)
+
+In [8]: for i in a:
+   ...:     print(i)
+   ...:     
+('a', 1)
+('b', 2)
+('c', 3)
+
+In [9]: a
+Out[9]: <zip at 0x7f6ff8eabb48>
+
+In [10]: for i in a:
+    ...:     print(i)
+    ...:     
+
+In [11]: a = zip(l1, l2)
+
+In [12]: b =dict(a)
+
+In [13]: b
+Out[13]: {'a': 1, 'b': 2, 'c': 3}
+
+In [14]: b
+Out[14]: {'a': 1, 'b': 2, 'c': 3}
+
+In [15]: b
+Out[15]: {'a': 1, 'b': 2, 'c': 3}
+
+In [16]: b
+Out[16]: {'a': 1, 'b': 2, 'c': 3}
+
+In [17]: ]
+  File "<ipython-input-17-de603c91038f>", line 1
+    ]
+    ^
+SyntaxError: invalid syntax
+
+
+In [18]: 
+
+In [18]: b['a']
+Out[18]: 1
+
+In [19]: l3 - 
+  File "<ipython-input-19-a71b3978ce02>", line 1
+    l3 -
+         ^
+SyntaxError: invalid syntax
+
+
+In [20]: l3 = 
+  File "<ipython-input-20-2bc5af6b2de5>", line 1
+    l3 =
+         ^
+SyntaxError: invalid syntax
+
+
+In [21]: l3 = ['c','v','b']
+
+In [22]: s = zip(l1,l2,l3)
+
+In [23]: for i in s:
+    ...:     print(i)
+    ...:     
+('a', 1, 'c')
+('b', 2, 'v')
+('c', 3, 'b')
+
+In [24]: v=zip(l1,l2)
+
+In [25]: for i in v:
+    ...:     if l2<4:
+    ...:         print('ok')
+    ...:         
+---------------------------------------------------------------------------
+TypeError                                 Traceback (most recent call last)
+<ipython-input-25-5a989ee77664> in <module>()
+      1 for i in v:
+----> 2     if l2<4:
+      3         print('ok')
+      4 
+
+TypeError: '<' not supported between instances of 'list' and 'int'
+
+In [26]: for i in v[l2]:
+    ...:     print('ok')
+    ...:     
+---------------------------------------------------------------------------
+TypeError                                 Traceback (most recent call last)
+<ipython-input-26-1c331bf913f1> in <module>()
+----> 1 for i in v[l2]:
+      2     print('ok')
+      3 
+
+TypeError: 'zip' object is not subscriptable
+
+In [27]: for i in v(l2)
+    ...:     print('ok')
+    ...: 
+    ...:     
+  File "<ipython-input-27-3627e7f52432>", line 1
+    for i in v(l2)
+                  ^
+SyntaxError: invalid syntax
+
+
+In [28]: v=zip(l1,l2)
+
+In [29]: for i in v:
+    ...:     print(i)
+    ...:     
+('a', 1)
+('b', 2)
+('c', 3)
+
+In [30]: v=zip(l1,l2)
+
+In [31]: for i in v:
+    ...:     if i[1]<4:
+    ...:         print(i[1])
+    ...:         
+1
+2
+3
+
+In [32]: 
