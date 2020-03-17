@@ -142,8 +142,11 @@ while size_layer_counting < max_height:
 	size_layer_counting = size_layer_counting + layer_size
 	size_layer_list.append(size_layer_counting)
 
+print(size_layer_list)
+print(max_height)
 
 layer_id = []
+
 
 # Determines the range of values since it will be variable
 for height_value in range(len(height)):
