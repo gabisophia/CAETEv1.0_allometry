@@ -8,13 +8,16 @@ integer::num_layer_round
 real :: layer_size
 real :: max_layer
 real :: heigher_layer
+real :: ipar
 
 real,allocatable :: layer_height(:)
+real,allocatable :: light_availability(:)
+real,allocatable :: light_used (:)
+real,allocatable :: light_incidence (:)
 
 
-do i=1,npls
-	height(i)=35-(i*2)+3
-	
+do i = 1, npls
+	height(i) = 35 -(i*2)+3
 enddo
 
 do i=1, npls
@@ -36,6 +39,9 @@ layer_size = max_height/num_layer_round
 print*, 'layer_size', layer_size
 
 allocate(layer_height(1:n))
+allocate(light_availability(1:n))
+allocate(light_used(1:n))
+allocate(light_incidence(1:n))
 
 do j=1,n
 	layer_height(j)=0
@@ -43,33 +49,36 @@ enddo
 
 do j=1,n
 	layer_height(j)=layer_height(j-1)+layer_size
+	print*, 'layer_height',layer_height(j)
 enddo
+
+ipar=100.
+
+do i=1,npls
+	do j=1,n
+		if (j.eq.n) then
+
+			light_incidence(j) = ipar
+
+			light_used(j) = light_incidence(j)*0.2
+
+			light_availability(j) = light_incidence(j)-light_used(j)
+
+		else if (height(i).lt.layer_height(j).and.height(i).gt.(layer_height(j-1))) then
+
+			light_incidence(j) = light_availability(j+1)
+
+			light_used(j) = light_incidence(j)*0.2
+
+			light_availability(j) = light_incidence(j)-light_used(j)			
+		endif
+	enddo
+enddo
+
 
 do j=1,n
-	print*, 'll',layer_height(j)
+	print*, j,'avai',light_availability(j), 'used',light_used(j),'inc',light_incidence(j)
 enddo
 
-
-
-!do i=1, npls
-!	do j=1,n
-!		if(height(i).eq.max_layer) then
-!	  		max_layer=max_layer
-!		else if(height(i).lt.max_layer)then
-!	 		layer_height(n)=layer_height(n)
-!	 		lowers_layer(n)=layer_height(n)
-!		endif
-!	enddo
-!enddo
-
-
-
-
-!do i=1,n_heights
-!	do j=1, num_layer_round
-!		print*,height(i),layer_height(j)
-!enddo
-!	enddo 
-
-
+!!!ATENTION: PROBLEM WITH THE LAST LAYER!!!
 end program light_competition
