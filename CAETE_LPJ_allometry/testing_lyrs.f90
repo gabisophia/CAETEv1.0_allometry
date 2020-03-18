@@ -63,35 +63,30 @@ enddo
 ipar=100.
 
 do i=1,npls
-	do j=2,n
+	do j=n,1,-1
 		if (j.eq.n) then
 			light_incidence(j) = ipar
 			light_used(j) = light_incidence(j)*0.2
 			light_availability(j) = light_incidence(j)-light_used(j)
-
+		else if(j.eq.1) then
+				light_incidence(j) = light_availability(2)
+				light_used(j) = light_incidence(j)*0.2
+				light_availability(j) = light_incidence(j)-light_used(j)
 		else if ((height(i).lt.layer_height(j)).and.(height(i).gt.(layer_height(j-1)))) then
 			light_incidence(j) = light_availability(j+1)
 			light_used(j) = light_incidence(j)*0.2
 			light_availability(j) = light_incidence(j)-light_used(j)
-		endif
-		
-	enddo
-enddo
-
-do i=1,npls
-	do j=1,n
-		if(j.eq.1) then
-			light_incidence(j) = light_availability(2)
-			light_used(j) = light_incidence(j)*0.2
-			light_availability(j) = light_incidence(j)-light_used(j)
+			
 		endif
 	enddo
 enddo
 
-!!!! ATTENTION: if there is no pls in the previous layer??????
+!!!!ATENTION IF A LAYER DOES'NT HAVE A PLS
 
 do j=1,n
 	print*, j,'avai',light_availability(j),'used',light_used(j),'inc',light_incidence(j)
 enddo
+
+
 
 end program light_competition
