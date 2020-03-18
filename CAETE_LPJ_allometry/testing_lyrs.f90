@@ -21,7 +21,7 @@ real,allocatable :: light_incidence (:)
 
 
 do i = 1, npls
-	height(i) = 35 -(i*2)+1
+	height(i) = 35 -(i*2)+3
 	if (i.eq.1) then
 		height(i)=3.
 	endif
@@ -80,6 +80,18 @@ do i=1,npls
 		endif
 	enddo
 enddo
+
+do j=n,1,-1
+	print*, j-1, j , j+1
+enddo
+
+ do j=n,1,-1
+ 	if (light_availability(j).eq.0) then
+ 		light_incidence(j-1)=light_availability(j+1)
+ 		light_used(j-1) = light_incidence(j-1)*0.2
+		light_availability(j-1) = light_incidence(j-1)-light_used(j-1)
+ 	endif
+ enddo
 
 !!!!ATENTION IF A LAYER DOES'NT HAVE A PLS
 
