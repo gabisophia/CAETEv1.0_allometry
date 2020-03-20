@@ -14,10 +14,12 @@ real :: temp_incidence
 real :: temp_availability
 real :: temp_used
 
+
 real,allocatable :: layer_height(:)
 real,allocatable :: light_availability(:)
 real,allocatable :: light_used (:)
 real,allocatable :: light_incidence (:)
+real,allocatable :: height_aux(:,:)
 
 
 do i = 1, npls
@@ -50,6 +52,8 @@ allocate(layer_height(1:n))
 allocate(light_availability(1:n))
 allocate(light_used(1:n))
 allocate(light_incidence(1:n))
+allocate(height_aux(1:n,1:npls)) !it identi
+
 
 do j=1,n
 	layer_height(j)=0
@@ -60,7 +64,23 @@ do j=1,n
 	print*, 'layer_height',layer_height(j)
 enddo
 
+do i=1,npls
+	do j=1,n
+		
+		if ((height(i).le.layer_height(j)).and.(height(i).gt.(layer_height(j-1)))) then
+			height_aux(j,i)=height(i)
+			!id=id+1
+			print*,height_aux(j,i),i,j
+		else
+			!id=0
+		endif
+
+	enddo
+enddo
+
 ipar=100.
+
+
 
 do i=1,npls
 	do j=n,1,-1
@@ -73,20 +93,17 @@ do i=1,npls
 				light_used(j) = light_incidence(j)*0.2
 				light_availability(j) = light_incidence(j)-light_used(j)
 		else if ((height(i).lt.layer_height(j)).and.(height(i).gt.(layer_height(j-1)))) then
-			light_incidence(j) = light_availability(j+1)
-			light_used(j) = light_incidence(j)*0.2
-			light_availability(j) = light_incidence(j)-light_used(j)
-			
+			 light_incidence(j) = light_availability(j+1)
+			 light_used(j) = light_incidence(j)*0.2
+			 light_availability(j) = light_incidence(j)-light_used(j)
 		endif
 	enddo
 enddo
 
-do j=n,1,-1
-	print*, j-1, j , j+1
-enddo
 
  do j=n,1,-1
  	if (light_availability(j).eq.0) then
+ 		
  		light_incidence(j-1)=light_availability(j+1)
  		light_used(j-1) = light_incidence(j-1)*0.2
 		light_availability(j-1) = light_incidence(j-1)-light_used(j-1)
