@@ -3,9 +3,9 @@ program main
 	type :: layer_array
 		integer :: id
 		real :: height
-		real :: li
-		real :: lu
-		real :: la
+		real :: li !light incidence
+		real :: lu !light used
+		real :: la !ligh availability
 	end type layer_array
 
 	type(layer_array), allocatable :: layer(:)
@@ -32,6 +32,8 @@ program main
 	layer(6)%height = 9.71428585
 	layer(7)%id = 7
 	layer(7)%height = 4.85714293
+
+	
 
 	do i = 1, num_layers
 		if (i.eq.1) then
