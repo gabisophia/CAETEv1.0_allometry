@@ -1,6 +1,22 @@
 program light_competition
 
 
+!!!!some tips and thoughts (book fortran for Earth system science)!!!!
+
+!use the BLOCK statemente to declare variables during the program&
+!instead of allocatable (?) what is the difference
+
+
+
+
+
+
+
+
+
+
+!!!!!!!!
+
 		integer,parameter::npls=14
 		real, dimension(npls) :: height
 		real :: max_height
