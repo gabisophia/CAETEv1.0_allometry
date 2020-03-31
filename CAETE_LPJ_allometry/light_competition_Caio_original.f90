@@ -47,7 +47,7 @@ program main
 
 		layer(i)%lu = layer(i)%li * 0.2
 		layer(i)%la = layer(i)%li - layer(i)%lu
-		print*, layer(i)
+		!print*,'ava',layer(i)%la
 	enddo
 
 end program main 
