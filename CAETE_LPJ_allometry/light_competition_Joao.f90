@@ -58,10 +58,12 @@ program light_competition
     ! FIND the ID if each PLS
     do i=1,npls
         pls_h_id(i) = classify_pls(height(i), layer_height)
+        print*, pls_h_id(i), height(id), i
     enddo
 
+    
     print *, 'pls_layer ID', pls_h_id
-    print *, 'layer_height', layer_height
+    print *, 'layer_height', layers_height
     print *, 'layer_id', id
 
     ipar= 100. ! Wm⁻²

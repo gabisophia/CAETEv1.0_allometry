@@ -67,7 +67,7 @@ program light_competition
     
     do j=1,n
         layer_height(j)=layer_height(j-1)+layer_size
-        print*, 'layer_height',layer_height(j)
+        print*, 'layer_height',layer_height(j), j
     enddo
     
     LAI = 0.50
