@@ -1,4 +1,4 @@
-program main
+program light_competition
 
     type :: layer_array
         real :: sum_height
@@ -7,10 +7,10 @@ program main
         real :: layer_height
         real :: sum_LAI !LAI sum in a layer
         real :: mean_LAI !mean LAI in a layer
-        real :: beers_law
-        real :: li
-        real :: lu
-        real :: la
+        real :: beers_law !layer's light extinction
+        real :: li !layer's light incidence
+        real :: lu !layer's light used (relates to light extinction - Beers Law)
+        real :: la !light availability
     end type layer_array
 
     integer,parameter::npls=14
@@ -20,7 +20,7 @@ program main
     real :: max_height
     integer :: num_layer
     real :: layer_size
-    real :: APAR !J/m2/s
+    real :: incidence_rad !Incidence radiation (relates do APAR) in J/m2/s
     real :: watt_rs = 210 !shortwave radiation in watts/m2
     real :: short_rad !shortwave radiation in joules/s
     
@@ -115,20 +115,21 @@ program main
     short_rad = watt_rs*1000.
     !print*,'short_rad',short_rad
 
-    APAR = 0.5*short_rad
-    !print*,'APAR',APAR
+    incidence_rad = 0.5*short_rad
+    !print*,'APAR', incidence_rad
 
-    do i=1,num_layer
-        layer(i)%beers_law = APAR*&
+!=================== TEST ====================
+    do i=num_layer,1,-1
+        layer(i)%beers_law = incidence_rad*&
             &(1-exp(-0.5*layer(i)%mean_LAI))
          print*,'law',layer(i)%beers_law
     enddo
+!=============================================
 
-     
 
     do i=num_layer,1,-1
         if(i.eq.num_layer)then
-            layer(i)%li=100
+            layer(i)%li = incidence_rad
         else
             if(layer(i)%mean_height.gt.0.)then
 
@@ -140,13 +141,15 @@ program main
             endif
         endif
 
-        layer(i)%lu = layer(i)%li * 0.2
+        layer(i)%lu = layer(i)%li * (1-exp(-0.5*layer(i)%mean_LAI))
+        
         layer(i)%la = layer(i)%li - layer(i)%lu
 
-        print*,layer(i)%li,layer(i)%lu,layer(i)%la
+        print*,i, 'inc', layer(i)%li, 'used', layer(i)%lu,& 
+            &'avai', layer(i)%la
 
     enddo
 
     
 
-end program main
+end program light_competition
