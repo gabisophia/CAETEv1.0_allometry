@@ -59,7 +59,7 @@ program light_competition
     layer(i)%sum_height=0
     layer(i)%mean_height=0
     layer(i)%sum_LAI=0
-    layer(i)%mean_LAI=0
+   
 
     do i=1, num_layer
         do j=1,npls
@@ -74,12 +74,7 @@ program light_competition
 
                 layer(i)%sum_LAI=&
                 &layer(i)%sum_LAI+LAI(j)
-                 !print*,'sum_LAI', layer(i)%sum_LAI
-
-                layer(i)%num_height=&
-                &layer(i)%num_height+1
-
-                
+                                      
             endif
         enddo
 
