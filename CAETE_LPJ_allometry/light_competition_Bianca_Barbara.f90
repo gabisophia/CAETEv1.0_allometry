@@ -14,8 +14,9 @@ program light_competition
     end type layer_array
 
     integer,parameter::npls=14
-    real, dimension(npls) :: height
-    real, dimension(npls) :: LAI
+    real, dimension(npls), allocatable :: height (:)
+    real, dimension(npls) :: LAI !Leaf Area Index (m2/m2)
+    real, dimension(npls), allocatable :: diam (:) !Tree diameter in m. (Smith et al., 2001 - Supplementary)
     
     real :: max_height
     integer :: num_layer
@@ -23,6 +24,10 @@ program light_competition
     real :: incidence_rad !Incidence radiation (relates do APAR) in J/m2/s
     real :: watt_rs = 210 !shortwave radiation in watts/m2
     real :: short_rad !shortwave radiation in joules/s
+    real :: k_allom1 = 100. !allometric constant (Table 3; Sitch et al., 2003)
+    real :: k_allom2 = 40. !allometric constant (Table 3; Sitch et al., 2003)
+    real :: k_allom3 = 0.5 !allometric constant (Table 3; Sitch et al., 2003)
+    real :: krp = 1.6 !allometric constant (Table 3; Sitch et al., 2003)
     
     integer::i,j
 
@@ -30,29 +35,48 @@ program light_competition
 
     type(layer_array), allocatable :: layer(:)
 
+! Variables with generic values for testing the logic code
+
+    real, dimension(npls) :: dwood !wood density (g/cm-3) *Fearnside, 1997 - aleatory choices
+    real, dimension(npls) :: carbon_stem !KgC/m2 (Cheart + Csap)
+    real, dimension(npls) :: carbon_leaf !KgC/m2 
+
+    dwood=(/0.74,0.73,0.59,0.52,0.41,0.44,0.86,0.42,0.64,0.69,0.92,0.60,0.36,0.20/)
+    carbon_stem=(/7.,12.,7.2,8.3,10.9,11.3,7.5,11.5,10.,8.6,7.3,10.3,6.8,11./)
+    !carbon_leaf=(//)
+
+! Allometric Equations
+
+    diam = ((4+(carbon_stem))/((dwood)*3.14*40))**(1/(2+0.5))
+    print*, 'diam', diam
+
+    height = k_allom2*(diam**k_allom3)
+    print*, 'height', height
     
     LAI=(/1.,1.2,1.4,1.6,1.8,2.0,2.2,2.5,2.7,2.9,3.,3.5,4.,4.2/)
 
-    height=(/2.0,3.0,3.7,10.,10.5,12.,13.,20.,22.,27.,27.5,28.,29.,34./)
+    !height=(/2.0,3.0,3.7,10.,10.5,12.,13.,20.,22.,27.,27.5,28.,29.,34./)
+
+! Layer's dynamics
 
     max_height = maxval(height)
-   !print*, 'max_height',max_height
+    print*, 'max_height',max_height
     
     num_layer = nint(max_height/5)
-    !print*, 'num_layer',num_layer
+    print*, 'num_layer',num_layer
 
     allocate(layer(1:num_layer))
     
     last_with_pls=num_layer
 
     layer_size = max_height/num_layer
-    !print*, 'layer_size', layer_size
+    print*, 'layer_size', layer_size
 
     layer(i)%layer_height=0
 
     do i=1,num_layer
         layer(i)%layer_height=layer_size*i
-        !print*, 'layer_height',layer(i)%layer_height, i
+        print*, 'layer_height',layer(i)%layer_height, i
     enddo
 
     layer(i)%num_height=0
