@@ -18,9 +18,9 @@ program light_competition
     real, dimension(npls), allocatable :: LAI (:) !Leaf Area Index (m2/m2)
     real, dimension(npls), allocatable :: diam (:) !Tree diameter in m. (Smith et al., 2001 - Supplementary)
     real, dimension(npls), allocatable :: crown_area (:) !Tree crown area (m2) (Sitch et al., 2003)
-    real, dimension(npls), allocatable :: FPCind (:) !Foliage projective cover for each PLS (Sitch et al., 2003)
-    real, dimension(npls), allocatable :: FPCgrid (:) !Fractional projective cover in grid cell (Sitch et al., 2003)
-    real, dimension(npls), allocatable :: nind (:) !number of individuals per PLS (Smith, 2001, thesis)
+    real, allocatable :: FPCind (:) !Foliage projective cover for each PLS (Sitch et al., 2003)
+    real, allocatable :: FPCgrid (:) !Fractional projective cover in grid cell (Sitch et al., 2003)
+    real, allocatable :: nind (:) !number of individuals per PLS (Smith, 2001, thesis)
     
     real :: max_height
     integer :: num_layer
@@ -35,7 +35,7 @@ program light_competition
     real :: kla_sa = 8000 !constant relates to leaf properties (Table 3; Sitch et al., 2003)
     real :: spec_leaf = 21.7 !generic value to calculate leaf area index (LAI)
     
-    integer::i,j,k
+    integer::i,j
 
     integer :: last_with_pls
 
@@ -68,14 +68,20 @@ program light_competition
 
 ! Grid-Cell Properties
 
-    nind = diam**(-1.6)
-    print*, 'Nind', nind
+    allocate (nind(1:npls))
+    allocate (FPCind(1:npls))
+    allocate (FPCgrid(1:npls))
 
-    FPCind = (1-exp(-0.5*LAI))
-    print*, 'FPC', FPCind
+    do j=1,npls
+        nind(j) = diam(j)**(-1.6)
+        print*, 'Nind', nind(j)
 
-    FPCgrid = diam*nind*FPCind
-    print*, 'FPC-GRID', FPCgrid
+        FPCind(j) = (1-exp(-0.5*LAI(j)))
+        print*, 'FPC', FPCind(j)
+
+        FPCgrid(j) = diam(j)*nind(j)*FPCind(j)
+        print*, 'FPC-GRID', FPCgrid(j)
+    enddo
 
 ! Layer's dynamics
 
