@@ -13,10 +13,14 @@ program light_competition
         real :: la !light availability
     end type layer_array
 
-    integer,parameter::npls=14
+    integer, parameter::npls=14
     real, dimension(npls), allocatable :: height (:)
-    real, dimension(npls) :: LAI !Leaf Area Index (m2/m2)
+    real, dimension(npls), allocatable :: LAI (:) !Leaf Area Index (m2/m2)
     real, dimension(npls), allocatable :: diam (:) !Tree diameter in m. (Smith et al., 2001 - Supplementary)
+    real, dimension(npls), allocatable :: crown_area (:) !Tree crown area (m2) (Sitch et al., 2003)
+    real, dimension(npls), allocatable :: FPCind (:) !Foliage projective cover for each PLS (Sitch et al., 2003)
+    real, dimension(npls), allocatable :: FPCgrid (:) !Fractional projective cover in grid cell (Sitch et al., 2003)
+    real, dimension(npls), allocatable :: nind (:) !number of individuals per PLS (Smith, 2001, thesis)
     
     real :: max_height
     integer :: num_layer
@@ -28,8 +32,10 @@ program light_competition
     real :: k_allom2 = 40. !allometric constant (Table 3; Sitch et al., 2003)
     real :: k_allom3 = 0.5 !allometric constant (Table 3; Sitch et al., 2003)
     real :: krp = 1.6 !allometric constant (Table 3; Sitch et al., 2003)
+    real :: kla_sa = 8000 !constant relates to leaf properties (Table 3; Sitch et al., 2003)
+    real :: spec_leaf = 21.7 !generic value to calculate leaf area index (LAI)
     
-    integer::i,j
+    integer::i,j,k
 
     integer :: last_with_pls
 
@@ -41,9 +47,9 @@ program light_competition
     real, dimension(npls) :: carbon_stem !KgC/m2 (Cheart + Csap)
     real, dimension(npls) :: carbon_leaf !KgC/m2 
 
-    dwood=(/0.74,0.73,0.59,0.52,0.41,0.44,0.86,0.42,0.64,0.69,0.92,0.60,0.36,0.20/)
-    carbon_stem=(/7.,12.,7.2,8.3,10.9,11.3,7.5,11.5,10.,8.6,7.3,10.3,6.8,11./)
-    !carbon_leaf=(//)
+    dwood=(/0.74,0.73,0.59,0.52,0.41,0.44,0.86,0.42,0.64,0.69,0.92,0.60,0.36,0.99/)
+    carbon_stem=(/7.,12.,7.2,8.3,8.8,9.7,7.5,11.5,10.,8.6,7.3,10.3,6.8,9.9/)
+    carbon_leaf=(/0.15,3.,0.18,0.6,1.5,1.8,0.3,2.,0.8,0.64,0.25,1.,0.2,1.7/)
 
 ! Allometric Equations
 
@@ -53,9 +59,23 @@ program light_competition
     height = k_allom2*(diam**k_allom3)
     print*, 'height', height
     
-    LAI=(/1.,1.2,1.4,1.6,1.8,2.0,2.2,2.5,2.7,2.9,3.,3.5,4.,4.2/)
+    crown_area = k_allom1*(diam**krp)
+    print*, 'crown', crown_area
 
-    !height=(/2.0,3.0,3.7,10.,10.5,12.,13.,20.,22.,27.,27.5,28.,29.,34./)
+    LAI = (carbon_leaf*spec_leaf)/crown_area
+    print*, 'LAI', LAI
+
+
+! Grid-Cell Properties
+
+    nind = diam**(-1.6)
+    print*, 'Nind', nind
+
+    FPCind = (1-exp(-0.5*LAI))
+    print*, 'FPC', FPCind
+
+    FPCgrid = diam*nind*FPCind
+    print*, 'FPC-GRID', FPCgrid
 
 ! Layer's dynamics
 
@@ -168,7 +188,6 @@ program light_competition
             &'avai', layer(i)%la
 
     enddo
-
     
 
 end program light_competition
