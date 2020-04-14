@@ -72,6 +72,7 @@ program light_competition
     allocate (FPCind(1:npls))
     allocate (FPCgrid(1:npls))
 
+    !!!to be verified (what is the size of the gc? and also will we deal with bare soil?)
     do j=1,npls
         nind(j) = diam(j)**(-1.6)
         print*, 'Nind', nind(j)
