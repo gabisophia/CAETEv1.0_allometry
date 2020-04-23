@@ -21,6 +21,7 @@ program light_competition
     real, allocatable :: FPCind (:) !Foliage projective cover for each PLS (Sitch et al., 2003)
     real, allocatable :: FPCgrid (:) !Fractional projective cover in grid cell (Sitch et al., 2003)
     real, allocatable :: nind (:) !number of individuals per PLS (Smith, 2001, thesis)
+    real, allocatable :: Hcrit (:) !critical buckling height (in m) to be mechanic stable (Langam, 2017)
     
     real :: max_height
     integer :: num_layer
@@ -82,6 +83,20 @@ program light_competition
 
         FPCgrid(j) = diam(j)*nind(j)*FPCind(j)
         print*, 'FPC-GRID', FPCgrid(j)
+    enddo
+
+! Mortality Dynamic
+    !Mortality relates to height critic (Langam, 2017 - aDGVM)
+
+    allocate (Hcrit(1:npls))
+
+    do j=1,npls
+        !dwood*1000 -> transform wood density to g cm-3 to kg m-3
+        !the symbol 'rho' is diam/height -> equal to resistivity (physical concepts)
+
+        Hcrit(j) = (0.79*(((11.852*(diam(j)/height(j))+37)/9.81)*&
+        &((dwood(j)*1000)**1/3))*(diam(j)**2/3))
+        print*, 'Hcrit', Hcrit(j)
     enddo
 
 ! Layer's dynamics
