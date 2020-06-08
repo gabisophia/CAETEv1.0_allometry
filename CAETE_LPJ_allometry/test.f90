@@ -23,7 +23,6 @@ program light_competition
     real, allocatable :: nind (:) !number of individuals per PLS (Smith, 2001, thesis)
     real, allocatable :: Hcrit (:) !critical buckling height (in m) to be mechanic stable (Langam, 2017)
     real, allocatable :: Pi (:) !probability for mortality as a result of mechanic instability (Langam, 2017)
-    real, allocatable :: mlight (:) !mortality due to light competition (Zeng et al., 2014)
     real, allocatable :: soma_FPC (:)
     
     real :: max_height
@@ -38,6 +37,9 @@ program light_competition
     real :: krp = 1.6 !allometric constant (Table 3; Sitch et al., 2003)
     real :: kla_sa = 8000 !constant relates to leaf properties (Table 3; Sitch et al., 2003)
     real :: spec_leaf = 21.7 !generic value to calculate leaf area index (LAI)
+    real :: sum_FPC
+    real :: sum_nind
+    real :: mlight
     
     integer::i,j
 
