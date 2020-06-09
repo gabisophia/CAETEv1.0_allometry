@@ -110,22 +110,17 @@ program light_competition
     enddo
 
     !Mortality relates to Light Competition (IAP-DGVM; Zeng et al., 2014)
-    
-    !allocate (mlight(1:npls))
 
-    !sum(FPCgrid)=0.0
-    !sum(nind)=0.0
+    !The result of 'mligh' formulation is the rate of mortality. 
+    !This value indicate the rate of tree mortality due to the light competition.
 
     do j=1,npls
         sum_FPC=sum_FPC+FPCgrid(j)
         sum_nind=sum_nind+nind(j)
     enddo
     
-    !MLIGHT = 0.95 / (SOMA DE FPCGRID) X (SOMA DO NUMERO DE INDIVIDUOS) - 1
-    mlight = (1-(0.95/sum(FPCgrid))*sum(nind))
+    mlight = (1-(0.95/sum_FPC)*sum_nind)
     print*, 'mort light', mlight
-
-
 
 ! Layer's dynamics
 

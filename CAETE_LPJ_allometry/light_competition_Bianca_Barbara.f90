@@ -35,6 +35,9 @@ program light_competition
     real :: krp = 1.6 !allometric constant (Table 3; Sitch et al., 2003)
     real :: kla_sa = 8000 !constant relates to leaf properties (Table 3; Sitch et al., 2003)
     real :: spec_leaf = 21.7 !generic value to calculate leaf area index (LAI)
+    real :: sum_FPCgrid
+    real :: sum_nind
+    real :: mlight
     
     integer::i,j
 
@@ -81,7 +84,7 @@ program light_competition
         FPCind(j) = (1-exp(-0.5*LAI(j)))
         print*, 'FPC', FPCind(j)
 
-        FPCgrid(j) = diam(j)*nind(j)*FPCind(j)
+        FPCgrid(j) = crown_area(j)*nind(j)*FPCind(j)
         print*, 'FPC-GRID', FPCgrid(j)
     enddo
 
@@ -98,6 +101,19 @@ program light_competition
         &((dwood(j)*1000)**1/3))*(diam(j)**2/3))
         print*, 'Hcrit', Hcrit(j)
     enddo
+
+    !Mortality relates to Light Competition (IAP-DGVM; Zeng et al., 2014)
+
+    !The result of 'mligh' formulation is the rate of mortality. 
+    !This value indicate the rate of tree mortality due to the light competition.
+
+    do j=1,npls
+        sum_FPCgrid=sum_FPCgrid+FPCgrid(j)
+        sum_nind=sum_nind+nind(j)
+    enddo
+    
+    mlight = (1-(0.95/sum_FPCgrid)*sum_nind)
+    print*, 'mort light', mlight
 
 ! Layer's dynamics
 
