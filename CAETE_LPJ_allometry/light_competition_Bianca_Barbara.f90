@@ -21,8 +21,8 @@ program light_competition
     real, allocatable :: FPCind (:) !Foliage projective cover for each PLS (Sitch et al., 2003)
     real, allocatable :: FPCgrid (:) !Fractional projective cover in grid cell (Sitch et al., 2003)
     real, allocatable :: FPCgrid_perc (:) !Fractional projective cover in grid cell relative to grid cell area (Sitch et al., 2003)
-    real, allocatable :: nind (:) !number of individuals per PLS (Smith, 2001, thesis)
-    real, allocatable :: nind_red (:) !reduced number of individuals per PLS according to the self-thinning rule (Smith, 2001, thesis)
+    integer, allocatable :: nind (:) !number of individuals per PLS (Smith, 2001, thesis)
+    integer, allocatable :: nind_red (:) !reduced number of individuals per PLS according to the self-thinning rule (Smith, 2001, thesis)
     real, allocatable :: Hcrit (:) !critical buckling height (in m) to be mechanic stable (Langam, 2017)
     
     real :: max_height
@@ -41,9 +41,12 @@ program light_competition
     real :: sum_FPCgrid_perc=0.0
     real :: sum_nind=0.0
     real :: mlight=0.0
-    real :: gc_area = 300 !grid cell size - 300 m2 for testing purpose
+    real :: gc_area = 300 !grid cell size - 300 m2 FOR TESTING PURPOSE (the real value will be 1ha or 10000 m2)
     real :: gc_area_95 = 0. !95% of grid cell size 
     real :: FPC_red = 0. !reduction of FPC
+    real :: sum_FPCgrid_95 = 0.0 !!the new number of total PLS average-individuals after % reduction equals maximum to
+                                 !! not to exceed 95% occupation.
+    real :: sum_nind_95 = 0.0 !the new number of total PLS average-individuals after % reduction. 
     
     integer::i,j
 
@@ -84,10 +87,10 @@ program light_competition
     allocate (FPCgrid(1:npls))
     allocate (FPCgrid_perc(1:npls))
 
-!!===========		QUESTIONS TO BE SOLVED ========!!!
-    !!!to be verified (what is the size of the gc? and also will we deal with bare soil?)
+!!!!===========		QUESTIONS TO BE SOLVED      ===========!!!!
+    !!!to be verified (what is the size of the gc? and also will we deal with bare soil?
     !!!what about the grasses?
-!!!!================================================!!!!
+!!!!=======================================================!!!!
 
     do j=1,npls
         nind(j) = diam(j)**(-1.6)
@@ -117,58 +120,55 @@ program light_competition
         print*, 'Hcrit', Hcrit(j)
     enddo
 
-    !Mortality relates to Light Competition (IAP-DGVM; Zeng et al., 2014)
+    !Mortality relates to Light Competition 
 
-    !The result of 'mligh' formulation is the rate of mortality. 
-    !This value indicate the rate of tree mortality due to the light competition.
+    !The result of 'mligh' formulation is the % of reduction of PLS ocupation. 
+    !This value indicate the reduction percent of tree FPC due to the light (or space) competition.
 
     do j=1,npls
-        sum_FPCgrid=sum_FPCgrid+FPCgrid(j)
-        sum_FPCgrid_perc=sum_FPCgrid_perc+FPCgrid_perc(j)
-        sum_nind=sum_nind+nind(j)
+        sum_FPCgrid = sum_FPCgrid+FPCgrid(j)
+        sum_FPCgrid_perc = sum_FPCgrid_perc+FPCgrid_perc(j)
+        sum_nind = sum_nind+nind(j)
     enddo
     
+    print*, 'NIND_SUM', sum_nind
     print*, 'SUM-FPC-GRID-PERC', sum_FPCgrid_perc
     print*, 'SUM-FPC-GRID', sum_FPCgrid
 
-    gc_area_95=0.95*gc_area
+    gc_area_95 = 0.95*gc_area
     print*,'GC-AREA-95', gc_area_95
 
-    FPC_red=-((gc_area_95-sum_FPCgrid)/sum_FPCgrid)
-    print*, 'FPC_red', FPC_red
+    FPC_red = -((gc_area_95-sum_FPCgrid)/sum_FPCgrid)
+    print*, 'FPC_reduction', FPC_red
 
-    sum_FPCgrid=0.0 !reinicializando
     do j=1, npls
-    	FPCgrid(j)=FPCgrid(j)- FPCgrid(j)*FPC_red
-    	sum_FPCgrid=sum_FPCgrid+FPCgrid(j)
-    	print*, '###################',FPCgrid(j)
-    enddo
-    	print*, '******************',sum_FPCgrid
-    !do j=1,npls
-     !   nind_red(j) = (diam(j)**(-1.6))*FPC_red
-      !  print*, '******Nind_red*****', nind_red(j)
-    !enddo
 
-    !if (sum_FPCgrid_perc.gt.95.) then
+        FPCgrid(j) = FPCgrid(j)-FPCgrid(j)*FPC_red
+        print*, 'new_FPCgd',FPCgrid(j)
     
-    !	print*, 'gt 95'
-    !else 
-    !	sum_FPCgrid_perc=sum_FPCgrid_perc	
-    !	print*, 'lt 95'
-    !endif
+        sum_FPCgrid_95 = sum_FPCgrid_95 + FPCgrid(j)
 
+        nind_red(j) = nind(j)-nind(j)*FPC_red !the new number of PLS average-individuals after reduction.
+        print*, 'new_nind', nind_red(j)
+
+        sum_nind_95 = sum_nind_95 + nind_red(j) !the new number of total PLS average-individuals. !REVIEW THE RESULTS.
+
+    enddo
+
+        print*, '*****sum_new.FPCgd', sum_FPCgrid_95
+        print*, '*****sum_new.nind', sum_nind_95
+           
+    !Percentage of tree population reduction in all area: (IAP-DGVM; Zeng et al., 2014) - !ATTENTION!
     mlight = (1.-(0.95/sum_FPCgrid))*sum_nind
-    print*, '********mort light', mlight
+    print*, 'mort_light', mlight
 
     
     do j=1,npls
         FPCgrid(j) = FPCgrid(j)*(mlight/100)
-
-        print*, 'new_FPC', FPCgrid(j)
+            print*, 'new_pop_dinamic', FPCgrid(j)
 
         FPCgrid_perc(j) = (FPCgrid(j)*100)/gc_area
-
-        print*, 'new_FPC_perc', FPCgrid_perc(j)
+            print*, 'new_popdinamic_perc', FPCgrid_perc(j)
                 
     enddo
    
