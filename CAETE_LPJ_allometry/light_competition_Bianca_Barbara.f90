@@ -126,6 +126,20 @@ program light_competition
     mlight = (1-(0.95/sum_FPCgrid)*sum_nind)
     print*, 'mort light', mlight
 
+    
+    !do j=1,npls
+        !FPCgrid(j) = FPCgrid(j)*mlight
+
+        !print*, 'new_FPC', FPCgrid(j)
+
+        !FPCgrid_perc(j) = (FPCgrid(j)/gc_area)*100
+        !print*, 'FPC-GRID-PERC_NEW', FPCgrid_perc(j), gc_area
+
+        !sum_FPCgrid=sum_FPCgrid+FPCgrid(j)
+        !sum_FPCgrid_perc=sum_FPCgrid_perc+FPCgrid_perc(j)
+        !print*, 'SUM_FPCGRID_NEW', sum_FPCgrid , 'SUM_PERC_FPCNEW', sum_FPCgrid_perc
+    !enddo
+
 ! Layer's dynamics
 
     max_height = maxval(height)
