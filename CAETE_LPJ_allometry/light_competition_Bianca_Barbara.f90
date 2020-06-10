@@ -20,6 +20,7 @@ program light_competition
     real, dimension(npls), allocatable :: crown_area (:) !Tree crown area (m2) (Sitch et al., 2003)
     real, allocatable :: FPCind (:) !Foliage projective cover for each PLS (Sitch et al., 2003)
     real, allocatable :: FPCgrid (:) !Fractional projective cover in grid cell (Sitch et al., 2003)
+    real, allocatable :: FPCgrid_perc (:) !Fractional projective cover in grid cell relative to grid cell area (Sitch et al., 2003)
     real, allocatable :: nind (:) !number of individuals per PLS (Smith, 2001, thesis)
     real, allocatable :: Hcrit (:) !critical buckling height (in m) to be mechanic stable (Langam, 2017)
     
@@ -36,8 +37,10 @@ program light_competition
     real :: kla_sa = 8000 !constant relates to leaf properties (Table 3; Sitch et al., 2003)
     real :: spec_leaf = 21.7 !generic value to calculate leaf area index (LAI)
     real :: sum_FPCgrid
+    real :: sum_FPCgrid_perc
     real :: sum_nind
     real :: mlight
+    real :: gc_area = 1000000 !grid cell size - 1 ha for testing purpose
     
     integer::i,j
 
@@ -75,6 +78,7 @@ program light_competition
     allocate (nind(1:npls))
     allocate (FPCind(1:npls))
     allocate (FPCgrid(1:npls))
+    allocate (FPCgrid_perc(1:npls))
 
     !!!to be verified (what is the size of the gc? and also will we deal with bare soil?)
     do j=1,npls
@@ -86,6 +90,9 @@ program light_competition
 
         FPCgrid(j) = crown_area(j)*nind(j)*FPCind(j)
         print*, 'FPC-GRID', FPCgrid(j)
+
+        FPCgrid_perc(j) = (FPCgrid(j)/gc_area)*100
+        print*, 'FPC-GRID-PERC', FPCgrid_perc(j), gc_area
     enddo
 
 ! Mortality Dynamic
@@ -109,9 +116,13 @@ program light_competition
 
     do j=1,npls
         sum_FPCgrid=sum_FPCgrid+FPCgrid(j)
+        sum_FPCgrid_perc=sum_FPCgrid_perc+FPCgrid_perc(j)
         sum_nind=sum_nind+nind(j)
     enddo
     
+    print*, 'SUM-FPC-GRID-PERC', sum_FPCgrid_perc
+    print*, 'SUM-FPC-GRID', sum_FPCgrid
+
     mlight = (1-(0.95/sum_FPCgrid)*sum_nind)
     print*, 'mort light', mlight
 
