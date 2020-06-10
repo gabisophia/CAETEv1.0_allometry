@@ -37,10 +37,10 @@ program light_competition
     real :: kla_sa = 8000 !constant relates to leaf properties (Table 3; Sitch et al., 2003)
     real :: spec_leaf = 21.7 !generic value to calculate leaf area index (LAI)
     real :: sum_FPCgrid
-    real :: sum_FPCgrid_perc
+    real :: sum_FPCgrid_perc=0.0
     real :: sum_nind
     real :: mlight
-    real :: gc_area = 1000000 !grid cell size - 1 ha for testing purpose
+    real :: gc_area = 300 !grid cell size - 300 m2 for testing purpose
     
     integer::i,j
 
@@ -55,8 +55,8 @@ program light_competition
     real, dimension(npls) :: carbon_leaf !KgC/m2 
 
     dwood=(/0.74,0.73,0.59,0.52,0.41,0.44,0.86,0.42,0.64,0.69,0.92,0.60,0.36,0.99/)
-    carbon_stem=(/7.,12.,7.2,8.3,8.8,9.7,7.5,11.5,10.,8.6,7.3,10.3,6.8,9.9/)
-    carbon_leaf=(/0.15,3.,0.18,0.6,1.5,1.8,0.3,2.,0.8,0.64,0.25,1.,0.2,1.7/)
+    carbon_stem=(/27.,12.,17.2,25.3,8.8,9.7,12.5,11.5,10.,38.6,7.23,10.3,6.8,9.9/)
+    carbon_leaf=(/2.15,3.,1.18,1.6,1.5,1.8,0.3,2.,0.8,.84,0.25,1.,0.2,1.7/)
 
 ! Allometric Equations
 
@@ -91,7 +91,7 @@ program light_competition
         FPCgrid(j) = crown_area(j)*nind(j)*FPCind(j)
         print*, 'FPC-GRID', FPCgrid(j)
 
-        FPCgrid_perc(j) = (FPCgrid(j)/gc_area)*100
+        FPCgrid_perc(j) = (FPCgrid(j)*100)/gc_area
         print*, 'FPC-GRID-PERC', FPCgrid_perc(j), gc_area
     enddo
 
@@ -123,22 +123,20 @@ program light_competition
     print*, 'SUM-FPC-GRID-PERC', sum_FPCgrid_perc
     print*, 'SUM-FPC-GRID', sum_FPCgrid
 
-    mlight = (1-(0.95/sum_FPCgrid)*sum_nind)
+    mlight = (gc_area-(0.95/sum_FPCgrid))*sum_nind
     print*, 'mort light', mlight
 
     
-    !do j=1,npls
-        !FPCgrid(j) = FPCgrid(j)*mlight
+    do j=1,npls
+        FPCgrid_perc(j) = FPCgrid_perc(j)*mlight
 
-        !print*, 'new_FPC', FPCgrid(j)
+        print*, 'new_FPC', FPCgrid_perc(j)
 
-        !FPCgrid_perc(j) = (FPCgrid(j)/gc_area)*100
-        !print*, 'FPC-GRID-PERC_NEW', FPCgrid_perc(j), gc_area
+       
 
-        !sum_FPCgrid=sum_FPCgrid+FPCgrid(j)
-        !sum_FPCgrid_perc=sum_FPCgrid_perc+FPCgrid_perc(j)
-        !print*, 'SUM_FPCGRID_NEW', sum_FPCgrid , 'SUM_PERC_FPCNEW', sum_FPCgrid_perc
-    !enddo
+        sum_FPCgrid_perc=sum_FPCgrid_perc+FPCgrid_perc(j)
+    enddo
+    print*, 'SUM_PERC_FPCNEW', sum_FPCgrid_perc
 
 ! Layer's dynamics
 
