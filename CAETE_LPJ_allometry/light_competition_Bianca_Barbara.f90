@@ -43,7 +43,7 @@ program light_competition
     real :: mlight=0.0
     real :: gc_area = 300 !grid cell size - 300 m2 FOR TESTING PURPOSE (the real value will be 1ha or 10000 m2)
     real :: gc_area_95 = 0. !95% of grid cell size 
-    real :: FPC_red = 0. !reduction of FPC
+    real :: FPC_red = 0. !reduction of FPC to not to exceed 95% occupation.
     real :: sum_FPCgrid_95 = 0.0 !!the new number of total PLS average-individuals after % reduction equals maximum to
                                  !! not to exceed 95% occupation.
     real :: sum_nind_95 = 0.0 !the new number of total PLS average-individuals after % reduction. 
@@ -148,8 +148,8 @@ program light_competition
     
         sum_FPCgrid_95 = sum_FPCgrid_95 + FPCgrid(j)
 
-        nind_red(j) = nind(j)-nind(j)*FPC_red !the new number of PLS average-individuals after reduction.
-        print*, 'new_nind', nind_red(j)
+        nind_red(j) = nind(j)-nind(j)*FPC_red !the new number of PLS average-individuals after reduction to 
+        print*, 'new_nind', nind_red(j), nind(j)       !occupy 95% of gc_area.
 
         sum_nind_95 = sum_nind_95 + nind_red(j) !the new number of total PLS average-individuals. !REVIEW THE RESULTS.
 
