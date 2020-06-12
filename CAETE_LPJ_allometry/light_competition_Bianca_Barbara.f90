@@ -21,8 +21,9 @@ program light_competition
     real, allocatable :: FPCind (:) !Foliage projective cover for each PLS (Sitch et al., 2003)
     real, allocatable :: FPCgrid (:) !Fractional projective cover in grid cell (Sitch et al., 2003)
     real, allocatable :: FPCgrid_perc (:) !Fractional projective cover in grid cell relative to grid cell area (Sitch et al., 2003)
-    integer, allocatable :: nind (:) !number of individuals per PLS (Smith, 2001, thesis)
-    integer, allocatable :: nind_red (:) !reduced number of individuals per PLS according to the self-thinning rule (Smith, 2001, thesis)
+    real, allocatable :: nind (:) !number of individuals per PLS (Smith, 2001, thesis)
+    real, allocatable :: nind_red (:) !reduced number of individuals per PLS according to the self-thinning rule (Smith, 2001, thesis)
+    real, allocatable :: new_diam (:) !diameter updated with new number of ind (for testing purpose)
     real, allocatable :: Hcrit (:) !critical buckling height (in m) to be mechanic stable (Langam, 2017)
     
     real :: max_height
@@ -83,6 +84,7 @@ program light_competition
 
     allocate (nind(1:npls))
     allocate (nind_red(1:npls))
+    allocate (new_diam(1:npls))
     allocate (FPCind(1:npls))
     allocate (FPCgrid(1:npls))
     allocate (FPCgrid_perc(1:npls))
@@ -157,6 +159,58 @@ program light_competition
 
         print*, '*****sum_new.FPCgd', sum_FPCgrid_95
         print*, '*****sum_new.nind', sum_nind_95
+
+
+!!!!testing allometry relations with the new number of individuals!!!
+	
+	do j=1,npls
+		new_diam(j)=nind_red(j)**(1/(-1.6))
+		print*, 'new_diam', new_diam(j)
+
+		height(j) = k_allom2*(new_diam(j)**k_allom3)
+    	print*, 'new height', height(j)
+    
+        crown_area(j) = k_allom1*(new_diam(j)**krp)
+    	print*, 'new crown', crown_area(j)
+
+    	LAI(j) = (carbon_leaf(j)*spec_leaf)/crown_area(j)
+    	print*, 'new LAI', LAI(j) 
+
+    enddo 
+
+    do j=1,npls
+    	FPCind(j)=0
+    	FPCgrid(j)=0
+    	FPCgrid_perc(j)=0
+
+    enddo
+
+    do j=1,npls
+    	FPCind(j) = (1-exp(-0.5*LAI(j)))
+        print*, 'new_FPC', FPCind(j)
+
+        FPCgrid(j) = (crown_area(j)*nind_red(j)*FPCind(j))
+        print*, 'new_FPC-GRID', FPCgrid(j)
+
+        FPCgrid_perc(j) = (FPCgrid(j)*100)/gc_area
+        print*, 'new_FPC-GRID-PERC', FPCgrid_perc(j), gc_area
+    enddo
+
+    sum_FPCgrid = 0
+    sum_FPCgrid_perc = 0
+    sum_nind = 0
+
+    do j=1,npls
+        sum_FPCgrid = sum_FPCgrid+FPCgrid(j)
+        sum_FPCgrid_perc = sum_FPCgrid_perc+FPCgrid_perc(j)
+        sum_nind = sum_nind+nind_red(j)
+    enddo
+    
+    print*, 'new NIND_SUM', sum_nind
+    print*, 'new SUM-FPC-GRID-PERC', sum_FPCgrid_perc
+    print*, 'new SUM-FPC-GRID', sum_FPCgrid
+
+ !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!     
            
     !Percentage of tree population reduction in all area: (IAP-DGVM; Zeng et al., 2014) - !ATTENTION!
     mlight = (1.-(0.95/sum_FPCgrid))*sum_nind
