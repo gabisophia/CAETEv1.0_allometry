@@ -137,29 +137,34 @@ program light_competition
     print*, 'SUM-FPC-GRID-PERC', sum_FPCgrid_perc
     print*, 'SUM-FPC-GRID', sum_FPCgrid
 
-    gc_area_95 = 0.95*gc_area
-    print*,'GC-AREA-95', gc_area_95
+    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!     
+           
+    !Percentage of tree population reduction in all area: (IAP-DGVM; Zeng et al., 2014) - !ATTENTION!
+    mlight = (1.-(95/sum_FPCgrid))*sum_nind
+    print*, '*******mort_light', mlight
 
-    FPC_red = -((gc_area_95-sum_FPCgrid)/sum_FPCgrid)
-    print*, 'FPC_reduction', FPC_red
+    !!!!testing the reduction in individuals number!!!
+    do j=1,npls
+    	nind_red(j) = nind(j)-nind(j)*(mlight/100)
+    	print*, "testing nind", nind_red(j)
 
-    do j=1, npls
+    	FPCgrid(j) = crown_area(j)*nind_red(j)*FPCind(j)
+        print*, 'testing nind FPC-GRID', FPCgrid(j)
 
-        FPCgrid(j) = FPCgrid(j)-FPCgrid(j)*FPC_red
-        print*, 'new_FPCgd',FPCgrid(j)
-    
-        sum_FPCgrid_95 = sum_FPCgrid_95 + FPCgrid(j)
+        FPCgrid_perc(j) = (FPCgrid(j)*100)/gc_area
+        print*, 'testing nind FPC-GRID-PERC', FPCgrid_perc(j), gc_area
+    enddo	
 
-        nind_red(j) = nind(j)-nind(j)*FPC_red !the new number of PLS average-individuals after reduction to 
-        print*, 'new_nind', nind_red(j), nind(j)       !occupy 95% of gc_area.
-
-        sum_nind_95 = sum_nind_95 + nind_red(j) !the new number of total PLS average-individuals. !REVIEW THE RESULTS.
-
+    sum_FPCgrid=0.
+    sum_FPCgrid_perc =0.
+    do j=1,npls
+        sum_FPCgrid = sum_FPCgrid+FPCgrid(j)
+        sum_FPCgrid_perc = sum_FPCgrid_perc+FPCgrid_perc(j)
     enddo
-
-        print*, '*****sum_new.FPCgd', sum_FPCgrid_95
-        print*, '*****sum_new.nind', sum_nind_95
-
+    print*, 'testing nind sumfpc', sum_FPCgrid
+    print*, 'testing nind sumfpc_perc', sum_FPCgrid_perc
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ 
 
 !!!!testing allometry relations with the new number of individuals!!!
 	
@@ -210,21 +215,7 @@ program light_competition
     print*, 'new SUM-FPC-GRID-PERC', sum_FPCgrid_perc
     print*, 'new SUM-FPC-GRID', sum_FPCgrid
 
- !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!     
-           
-    !Percentage of tree population reduction in all area: (IAP-DGVM; Zeng et al., 2014) - !ATTENTION!
-    mlight = (1.-(0.95/sum_FPCgrid))*sum_nind
-    print*, 'mort_light', mlight
-
-    
-    do j=1,npls
-        FPCgrid(j) = FPCgrid(j)*(mlight/100)
-            print*, 'new_pop_dinamic', FPCgrid(j)
-
-        FPCgrid_perc(j) = (FPCgrid(j)*100)/gc_area
-            print*, 'new_popdinamic_perc', FPCgrid_perc(j)
-                
-    enddo
+ 
    
 
 ! Layer's dynamics
