@@ -25,7 +25,10 @@ program light_competition
     real, allocatable :: nind_red (:) !reduced number of individuals per PLS according to the self-thinning rule (Smith, 2001, thesis)
     real, allocatable :: new_diam (:) !diameter updated with new number of ind (for testing purpose)
     real, allocatable :: Hcrit (:) !critical buckling height (in m) to be mechanic stable (Langam, 2017)
-    
+    real, allocatable :: FPCgrid_updt (:) !Fractional projective cover in grid cell (Sitch et al., 2003) - updated to occupy 95%
+    real, allocatable :: FPCgrid_perc_updt (:) !Fractional projective cover in grid cell relative to grid cell area (Sitch et al., 2003)-updated to occupy 95%
+
+
     real :: max_height
     integer :: num_layer
     real :: layer_size
@@ -44,10 +47,9 @@ program light_competition
     real :: mlight=0.0
     real :: gc_area = 300 !grid cell size - 300 m2 FOR TESTING PURPOSE (the real value will be 1ha or 10000 m2)
     real :: gc_area_95 = 0. !95% of grid cell size 
-    real :: FPC_red = 0. !reduction of FPC to not to exceed 95% occupation.
-    real :: sum_FPCgrid_95 = 0.0 !!the new number of total PLS average-individuals after % reduction equals maximum to
+    real :: sum_FPCgrid_updt = 0.0 !!the new number of total PLS average-individuals after % reduction equals maximum to
                                  !! not to exceed 95% occupation.
-    real :: sum_nind_95 = 0.0 !the new number of total PLS average-individuals after % reduction. 
+    real :: sum_FPCgrid_perc_updt = 0.0 !the new percentage of occupation of all PLS after % reduction. 
     
     integer::i,j
 
@@ -88,6 +90,9 @@ program light_competition
     allocate (FPCind(1:npls))
     allocate (FPCgrid(1:npls))
     allocate (FPCgrid_perc(1:npls))
+    allocate (FPCgrid_updt(1:npls))
+    allocate (FPCgrid_perc_updt(1:npls))
+
 
 !!!!===========		QUESTIONS TO BE SOLVED      ===========!!!!
     !!!to be verified (what is the size of the gc? and also will we deal with bare soil?
@@ -138,85 +143,30 @@ program light_competition
     print*, 'SUM-FPC-GRID', sum_FPCgrid
 
     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!     
-           
+    
     !Percentage of tree population reduction in all area: (IAP-DGVM; Zeng et al., 2014) - !ATTENTION!
-    mlight = (1.-(95/sum_FPCgrid))*sum_nind
+    mlight = (1.-(95/sum_FPCgrid)) *sum_nind
     print*, '*******mort_light', mlight
 
     !!!!testing the reduction in individuals number!!!
     do j=1,npls
-    	nind_red(j) = nind(j)-nind(j)*(mlight/100)
-    	print*, "testing nind", nind_red(j)
 
-    	FPCgrid(j) = crown_area(j)*nind_red(j)*FPCind(j)
-        print*, 'testing nind FPC-GRID', FPCgrid(j)
+		FPCgrid_updt(j)=FPCgrid(j)-FPCgrid(j)*(mlight/100)
+		print*, 'FPC with mlight', FPCgrid_updt(j)
 
-        FPCgrid_perc(j) = (FPCgrid(j)*100)/gc_area
-        print*, 'testing nind FPC-GRID-PERC', FPCgrid_perc(j), gc_area
+        FPCgrid_perc_updt(j) = (FPCgrid_updt(j)*100)/gc_area
+        print*, 'FPC-GRID-PERC with mlight', FPCgrid_perc_updt(j), gc_area
     enddo	
 
-    sum_FPCgrid=0.
-    sum_FPCgrid_perc =0.
-    do j=1,npls
-        sum_FPCgrid = sum_FPCgrid+FPCgrid(j)
-        sum_FPCgrid_perc = sum_FPCgrid_perc+FPCgrid_perc(j)
-    enddo
-    print*, 'testing nind sumfpc', sum_FPCgrid
-    print*, 'testing nind sumfpc_perc', sum_FPCgrid_perc
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
- 
-
-!!!!testing allometry relations with the new number of individuals!!!
-	
-	do j=1,npls
-		new_diam(j)=nind_red(j)**(1/(-1.6))
-		print*, 'new_diam', new_diam(j)
-
-		height(j) = k_allom2*(new_diam(j)**k_allom3)
-    	print*, 'new height', height(j)
-    
-        crown_area(j) = k_allom1*(new_diam(j)**krp)
-    	print*, 'new crown', crown_area(j)
-
-    	LAI(j) = (carbon_leaf(j)*spec_leaf)/crown_area(j)
-    	print*, 'new LAI', LAI(j) 
-
-    enddo 
-
-    do j=1,npls
-    	FPCind(j)=0
-    	FPCgrid(j)=0
-    	FPCgrid_perc(j)=0
-
-    enddo
-
-    do j=1,npls
-    	FPCind(j) = (1-exp(-0.5*LAI(j)))
-        print*, 'new_FPC', FPCind(j)
-
-        FPCgrid(j) = (crown_area(j)*nind_red(j)*FPCind(j))
-        print*, 'new_FPC-GRID', FPCgrid(j)
-
-        FPCgrid_perc(j) = (FPCgrid(j)*100)/gc_area
-        print*, 'new_FPC-GRID-PERC', FPCgrid_perc(j), gc_area
-    enddo
-
-    sum_FPCgrid = 0
-    sum_FPCgrid_perc = 0
-    sum_nind = 0
-
-    do j=1,npls
-        sum_FPCgrid = sum_FPCgrid+FPCgrid(j)
-        sum_FPCgrid_perc = sum_FPCgrid_perc+FPCgrid_perc(j)
-        sum_nind = sum_nind+nind_red(j)
-    enddo
-    
-    print*, 'new NIND_SUM', sum_nind
-    print*, 'new SUM-FPC-GRID-PERC', sum_FPCgrid_perc
-    print*, 'new SUM-FPC-GRID', sum_FPCgrid
-
- 
    
+    do j=1,npls
+        sum_FPCgrid_updt = sum_FPCgrid_updt+FPCgrid_updt(j)
+        sum_FPCgrid_perc_updt = sum_FPCgrid_perc_updt+FPCgrid_perc_updt(j)
+    enddo
+    print*, 'sumfpc updated', sum_FPCgrid_updt
+    print*, 'sumfpc_perc updated', sum_FPCgrid_perc_updt
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
 
 ! Layer's dynamics
 
