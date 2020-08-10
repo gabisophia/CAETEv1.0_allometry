@@ -18,6 +18,7 @@ program light_competition
     real, dimension(npls), allocatable :: LAI (:) !Leaf Area Index (m2/m2)
     real, dimension(npls), allocatable :: diam (:) !Tree diameter in m. (Smith et al., 2001 - Supplementary)
     real, dimension(npls), allocatable :: crown_area (:) !Tree crown area (m2) (Sitch et al., 2003)
+    real, dimension(npls), allocatable :: mort_WD (:) !mortality associated to WD (Sakschewski et al., 2014-SM)
     real, allocatable :: FPCind (:) !Foliage projective cover for each PLS (Sitch et al., 2003)
     real, allocatable :: FPCgrid (:) !Fractional projective cover in grid cell (Sitch et al., 2003)
     real, allocatable :: FPCgrid_perc (:) !Fractional projective cover in grid cell relative to grid cell area (Sitch et al., 2003)
@@ -44,13 +45,18 @@ program light_competition
     real :: sum_FPCgrid=0.0
     real :: sum_FPCgrid_perc=0.0
     real :: sum_nind=0.0
-    real :: mlight=0.0
+    real :: mort_occupation=0.0
     real :: gc_area = 300 !grid cell size - 300 m2 FOR TESTING PURPOSE (the real value will be 1ha or 10000 m2)
     real :: gc_area_95 = 0. !95% of grid cell size 
     real :: sum_FPCgrid_updt = 0.0 !!the new number of total PLS average-individuals after % reduction equals maximum to
                                  !! not to exceed 95% occupation.
     real :: sum_FPCgrid_perc_updt = 0.0 !the new percentage of occupation of all PLS after % reduction. 
-    
+    real :: mort_LPJ = 0.0 !testing the base-area Mortality
+    real :: mort_max=0.01
+    real :: par_min=4.05 !valor chutado
+    real :: k_par=4.05
+    real :: log_teste=0.0
+
     integer::i,j
 
     integer :: last_with_pls
@@ -92,6 +98,8 @@ program light_competition
     allocate (FPCgrid_perc(1:npls))
     allocate (FPCgrid_updt(1:npls))
     allocate (FPCgrid_perc_updt(1:npls))
+    allocate (mort_WD(1:npls))
+
 
 
 !!!!===========		QUESTIONS TO BE SOLVED      ===========!!!!
@@ -114,6 +122,16 @@ program light_competition
     enddo
 
 ! Mortality Dynamic
+	!!!!Mortality associated to WD
+	do j=1,npls
+		mort_WD(j)=(0.255/dwood(j))
+		!mort_WD(j)=
+		print*,'WD mortality',mort_WD(j)
+	enddo
+
+
+
+
     !Mortality relates to height critic (Langam, 2017 - aDGVM)
 
     allocate (Hcrit(1:npls))
@@ -145,20 +163,21 @@ program light_competition
     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!     
     
     !Percentage of tree population reduction in all area: (IAP-DGVM; Zeng et al., 2014) - !ATTENTION!
-    mlight = (1.-(95/sum_FPCgrid)) *sum_nind
-    print*, '*******mort_light', mlight
+    mort_occupation = (1.-(95/sum_FPCgrid)) *sum_nind
+    print*, '*******mort_light', mort_occupation
 
     !!!!testing the reduction in individuals number!!!
     do j=1,npls
 
-		FPCgrid_updt(j)=FPCgrid(j)-FPCgrid(j)*(mlight/100)
-		print*, 'FPC with mlight', FPCgrid_updt(j)
+		FPCgrid_updt(j)=FPCgrid(j)-FPCgrid(j)*(mort_occupation/100)
+		print*, 'FPC with mort_occupation', FPCgrid_updt(j)
 
         FPCgrid_perc_updt(j) = (FPCgrid_updt(j)*100)/gc_area
-        print*, 'FPC-GRID-PERC with mlight', FPCgrid_perc_updt(j), gc_area
+        print*, 'FPC-GRID-PERC with mort_occupation', FPCgrid_perc_updt(j), gc_area
     enddo	
 
-   
+    
+
     do j=1,npls
         sum_FPCgrid_updt = sum_FPCgrid_updt+FPCgrid_updt(j)
         sum_FPCgrid_perc_updt = sum_FPCgrid_perc_updt+FPCgrid_perc_updt(j)
@@ -166,7 +185,9 @@ program light_competition
     print*, 'sumfpc updated', sum_FPCgrid_updt
     print*, 'sumfpc_perc updated', sum_FPCgrid_perc_updt
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
+	!!!!testing LPJ equation!!!!!
+	mort_LPJ=((mort_max)*(par_min/k_par)*(exp(-5*(1-(sum_FPCgrid_perc/100)))))*100
+	print*, '*************mort_LPJ', mort_LPJ, sum_FPCgrid_perc
 
 ! Layer's dynamics
 
