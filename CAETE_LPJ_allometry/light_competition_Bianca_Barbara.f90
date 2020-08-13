@@ -15,6 +15,8 @@ program light_competition
 
     integer, parameter::npls=14
     real, dimension(npls), allocatable :: height (:)
+     real, dimension(npls), allocatable :: Cleaf (:) !leaf increment
+    real, dimension(npls), allocatable :: LA (:) !Leaf Area  (m2)
     real, dimension(npls), allocatable :: LAI (:) !Leaf Area Index (m2/m2)
     real, dimension(npls), allocatable :: diam (:) !Tree diameter in m. (Smith et al., 2001 - Supplementary)
     real, dimension(npls), allocatable :: crown_area (:) !Tree crown area (m2) (Sitch et al., 2003)
@@ -37,11 +39,12 @@ program light_competition
     real :: watt_rs = 210 !shortwave radiation in watts/m2
     real :: short_rad !shortwave radiation in joules/s
     real :: k_allom1 = 100. !allometric constant (Table 3; Sitch et al., 2003)
-    real :: k_allom2 = 40. !allometric constant (Table 3; Sitch et al., 2003)
-    real :: k_allom3 = 0.5 !allometric constant (Table 3; Sitch et al., 2003)
+    real :: k_allom2 = 36.0 !allometric constant Value from Philip's code (Allocation.py)
+    real :: k_allom3 = 0.22 !allometric constant Value from Philip's code (Allocation.py)
     real :: krp = 1.6 !allometric constant (Table 3; Sitch et al., 2003)
-    real :: kla_sa = 8000 !constant relates to leaf properties (Table 3; Sitch et al., 2003)
-    real :: spec_leaf = 21.7 !generic value to calculate leaf area index (LAI)
+    real :: kLatoSa = 6000.0 !leaf_area:sapwood_area. Value from Philip's code (Allocation.py)
+    real :: ltor = 0.77302587552347657 !leaf:root  Value from Philip's code (Allocation.py)
+    real :: spec_leaf = 15.365607091853349 !specific leaf area (variant trait) generic value to calculate leaf area index (LAI) value from Philip's code (Allocation.py)
     real :: sum_FPCgrid=0.0
     real :: sum_FPCgrid_perc=0.0
     real :: sum_nind=0.0
@@ -69,7 +72,7 @@ program light_competition
     real, dimension(npls) :: carbon_stem !KgC/m2 (Cheart + Csap)
     real, dimension(npls) :: carbon_leaf !KgC/m2 
 
-    dwood=(/0.74,0.73,0.59,0.52,0.41,0.44,0.86,0.42,0.64,0.69,0.92,0.60,0.36,0.99/)
+    dwood=(/0.74,0.73,0.59,0.52,0.41,0.44,0.86,0.42,0.64,0.69,0.92,0.60,0.36,0.99/) !atenção para a unidade
     carbon_stem=(/27.,12.,17.2,25.3,8.8,9.7,12.5,11.5,10.,38.6,7.23,10.3,6.8,9.9/)
     carbon_leaf=(/2.15,3.,1.18,1.6,1.5,1.8,0.3,2.,0.8,.84,0.25,1.,0.2,1.7/)
 
@@ -86,6 +89,10 @@ program light_competition
 
     LAI = (carbon_leaf*spec_leaf)/crown_area
     print*, 'LAI', LAI
+
+    LA=kLatoSa*SA
+
+    Cleaf
 
 
 ! Grid-Cell Properties

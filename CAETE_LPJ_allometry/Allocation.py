@@ -43,7 +43,6 @@ class Allocation:
         self.SS = self.tree.S + bminc - self.tree.L / self.ltor + self.tree.R
 
         #Main Code: Use the bisection method to solve for the leaf mass increment
-        self.DeltaL = self.bisection_method(0.0, 3.0)
         #Once we have the leaf mass increment we can cant get root mass increment based on the LTOR constant
         self.DeltaR = (self.DeltaL + self.tree.L) / self.ltor - self.tree.R
         #Finally using the cmass_increment mass conservation we can calculate sapwood increment
