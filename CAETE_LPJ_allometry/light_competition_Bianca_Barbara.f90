@@ -42,7 +42,7 @@ program light_competition
     real :: k_allom2 = 36.0 !allometric constant Value from Philip's code (Allocation.py)
     real :: k_allom3 = 0.22 !allometric constant Value from Philip's code (Allocation.py)
     real :: krp = 1.6 !allometric constant (Table 3; Sitch et al., 2003)
-    real :: kLatoSa = 6000.0 !leaf_area:sapwood_area. Value from Philip's code (Allocation.py)
+    real :: klatosa = 6000.0 !leaf_area:sapwood_area. Value from Philip's code (Allocation.py)
     real :: ltor = 0.77302587552347657 !leaf:root  Value from Philip's code (Allocation.py)
     real :: spec_leaf = 15.365607091853349 !specific leaf area (variant trait) generic value to calculate leaf area index (LAI) value from Philip's code (Allocation.py)
     real :: sum_FPCgrid=0.0
@@ -90,10 +90,7 @@ program light_competition
     LAI = (carbon_leaf*spec_leaf)/crown_area
     print*, 'LAI', LAI
 
-    LA=kLatoSa*SA
-
-    Cleaf
-
+ 
 
 ! Grid-Cell Properties
 
