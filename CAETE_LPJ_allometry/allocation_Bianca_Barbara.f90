@@ -1,6 +1,7 @@
 program allocation
     implicit none
 
+    
     type :: tree_allocation
         real :: carbon_sapwood = 0.0
         real :: carbon_leaf = 0.0
