@@ -84,27 +84,61 @@ module allocation
 	
 	function bisection_method(a, b) result(delta_leaf)
 		implicit none
-		real :: a, b 
+		real :: a
+		real :: b
 		real :: delta_leaf
 		real :: midpoint
-		real :: tol = 10
+		real :: tol = 0.01
+		real :: nstep
+		real :: test_var
+		real :: test_var2
+		real :: test_var3
 
-		if((f(a) * f(b)) .gt. 0) then
-			delta_leaf = -2.0 !end function, no root.
-			print*, 'Condition #01 - delta_leaf: ', delta_leaf
+		if ((f(a)*f(b)).gt. 0.) then
+			delta_leaf=-2
+			print*, "Condition #01 - delta_leaf: ", delta_leaf
 			return
-		elseif ((b - a) / 2.0 .gt. tol) then
-			 midpoint = (a + b) / 2.0
-
-		elseif (f(midpoint) .eq. 0) then
-			delta_leaf = 0 !The midpoint is the x-intercept/root.
-			print*, 'Condition #02 - delta_leaf: ', delta_leaf
-		 	return
-		elseif ((f(a) * f(midpoint) .lt. 0)) then
-			b = midpoint
 		else
-			a = midpoint
+			nstep=0.
+			 do while (((b-a)/2).gt.tol)
+			 	midpoint=((a+b)/2.)
+			 	test_var=f(midpoint)
+			 	print*,'midpoint', midpoint, test_var
+
+		 		if ((test_var).eq.0.) then
+			  			delta_leaf=midpoint
+			  			print*, 'Condition #02 - delta_leaf: ', delta_leaf
+			   			return
+				! elseif ((f(a)*f(midpoint)).lt.0.) then
+			 !  			 b2=midpoint
+			 !  			print*, 'running'
+			 !  	else
+			 !  			 a=midpoint
+			 !  			print*, 'running2'	
+				 endif
+			 end do
+			 
+			! nstep=nstep+ 1.
 		endif
+		
+
+		 ! if((f(a) * f(b)) .gt. 0) then
+		! 	delta_leaf = -2.0 !end function, no root.
+		! 	print*, 'Condition #01 - delta_leaf: ', delta_leaf
+		! 	return
+		! else nstep = 0
+		! ((b - a) / 2.0 .gt. tol) then
+		! 	 midpoint = (a + b) / 2.0
+
+		! elseif (f(midpoint) .eq. 0) then
+		! 	delta_leaf = 0 !The midpoint is the x-intercept/root.
+		! 	print*, 'Condition #02 - delta_leaf: ', delta_leaf
+		!  	return
+		! elseif ((f(a) * f(midpoint) .lt. 0)) then
+		! 	b = midpoint
+		! else
+		! 	a = midpoint
+		! endif
 	end function bisection_method
 
 	!==============================!
@@ -116,7 +150,7 @@ module allocation
 		real :: delta_leafs
 
 		!delta_leafs = bisection_method(0.0, 3.0)
-		 delta_leafs = bisection_method(-10.0, -20.0)
+		 delta_leafs = bisection_method(0.0, 10.0)
 
 		print*, 'CARBON ON LEAF =', delta_leafs
 	end subroutine leaf_carbon
