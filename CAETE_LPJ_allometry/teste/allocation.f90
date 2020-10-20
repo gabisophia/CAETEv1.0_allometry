@@ -1,4 +1,4 @@
-module allocation_test
+module allocation
     use ISO_FORTRAN_ENV, only: REAL32, REAL64, REAL128
     use constants
     implicit none
@@ -140,4 +140,4 @@ module allocation_test
          SS = S + bminc - L / ltor + R
      end function sapwood
 
-end module allocation_test
+end module allocation
