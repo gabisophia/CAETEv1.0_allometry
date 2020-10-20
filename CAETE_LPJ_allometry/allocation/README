@@ -7,3 +7,5 @@ caete.f90 : it only calls the functions writen at allocation.f90
 Allocation_Philip.py: original script developed by Philip
 
 allocation_logic_description.docx: describes the logic (structured portuguese) for allocation based on the Philip's code
+
+module_constants.f90: constants used in allocation script
