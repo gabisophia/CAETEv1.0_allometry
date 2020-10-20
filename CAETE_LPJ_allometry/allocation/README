@@ -1,0 +1,9 @@
+Folder containing the files for allocation (based on LPJ-GUESS; Sitch et al., 2003; Smith 2001)
+
+allocation.f90 : contains the functions for carbon distribution among the compartments
+
+caete.f90 : it only calls the functions writen at allocation.f90
+
+Allocation_Philip.py: original script developed by Philip
+
+allocation_logic_description.docx: describes the logic (structured portuguese) for allocation based on the Philip's code
