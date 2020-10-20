@@ -2,6 +2,8 @@ module constants
     use ISO_FORTRAN_ENV, only: REAL32, REAL64, REAL128
     implicit none
 
+    !!!!PRECISAMOS REVER AS UNIDADES.
+
     !==============================!
     != Constants
     !==============================!
