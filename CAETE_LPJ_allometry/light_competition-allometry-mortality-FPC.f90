@@ -44,7 +44,7 @@ program light_competition
     real :: krp = 1.6 !allometric constant (Table 3; Sitch et al., 2003)
     real :: klatosa = 6000.0 !leaf_area:sapwood_area. Value from Philip's code (Allocation.py)
     real :: ltor = 0.77302587552347657 !leaf:root  Value from Philip's code (Allocation.py)
-    real :: spec_leaf = 15.365607091853349 !specific leaf area (variant trait) generic value to calculate leaf area index (LAI) value from Philip's code (Allocation.py)
+    !real :: spec_leaf = 15.365607091853349 !specific leaf area (variant trait) generic value to calculate leaf area index (LAI) value from Philip's code (Allocation.py)
     real :: sum_FPCgrid=0.0
     real :: sum_FPCgrid_perc=0.0
     real :: sum_nind=0.0
@@ -71,10 +71,11 @@ program light_competition
     real, dimension(npls) :: dwood !wood density (g/cm-3) *Fearnside, 1997 - aleatory choices
     real, dimension(npls) :: carbon_stem !KgC/m2 (Cheart + Csap)
     real, dimension(npls) :: carbon_leaf !KgC/m2 
+    real, dimension(npls) :: spec_leaf
 
-    dwood=(/0.74,0.73,0.59,0.52,0.41,0.44,0.86,0.42,0.64,0.69,0.92,0.60,0.36,0.99/) !atenção para a unidade
-    carbon_stem=(/27.,12.,17.2,25.3,8.8,9.7,12.5,11.5,10.,38.6,7.23,10.3,6.8,9.9/)
-    carbon_leaf=(/2.15,3.,1.18,1.6,1.5,1.8,0.3,2.,0.8,.84,0.25,1.,0.2,1.7/)
+    !dwood=(/0.74,0.73,0.59,0.52,0.41,0.44,0.86,0.42,0.64,0.69,0.92,0.60,0.36,0.99/) !atenção para a unidade
+    !carbon_leaf=(/2.15,3.,1.18,1.6,1.5,1.8,0.3,2.,0.8,.84,0.25,1.,0.2,1.7/)
+    !spec_leaf=(/15.35,10.1,10.7,11.2,12.,14.1,13.7,11.5,12.2,10.,12.,11.,13.,14./)
 
 ! Allometric Equations
 
@@ -84,11 +85,11 @@ program light_competition
     height = k_allom2*(diam**k_allom3)
     print*, 'height', height
     
-    crown_area = k_allom1*(diam**krp)
-    print*, 'crown', crown_area
+    !crown_area = k_allom1*(diam**krp)
+    !print*, 'crown', crown_area
 
-    LAI = (carbon_leaf*spec_leaf)/crown_area
-    print*, 'LAI', LAI
+    !LAI = (carbon_leaf*spec_leaf)/crown_area
+    !print*, 'LAI', LAI
 
  
 
@@ -113,16 +114,16 @@ program light_competition
 
     do j=1,npls
         nind(j) = diam(j)**(-1.6)
-        print*, 'Nind', nind(j)
+        !print*, 'Nind', nind(j)
 
         FPCind(j) = (1-exp(-0.5*LAI(j)))
-        print*, 'FPC', FPCind(j)
+        !print*, 'FPC', FPCind(j)
 
         FPCgrid(j) = crown_area(j)*nind(j)*FPCind(j)
-        print*, 'FPC-GRID', FPCgrid(j)
+        !print*, 'FPC-GRID', FPCgrid(j)
 
         FPCgrid_perc(j) = (FPCgrid(j)*100)/gc_area
-        print*, 'FPC-GRID-PERC', FPCgrid_perc(j), gc_area
+        !print*, 'FPC-GRID-PERC', FPCgrid_perc(j), gc_area
     enddo
 
 ! Mortality Dynamic
@@ -130,7 +131,7 @@ program light_competition
 	do j=1,npls
 		mort_WD(j)=(0.255/dwood(j))
 		!mort_WD(j)=
-		print*,'WD mortality',mort_WD(j)
+		!print*,'WD mortality',mort_WD(j)
 	enddo
 
 
@@ -146,7 +147,7 @@ program light_competition
 
         Hcrit(j) = (0.79*(((11.852*(diam(j)/height(j))+37)/9.81)*&
         &((dwood(j)*1000)**1/3))*(diam(j)**2/3))
-        print*, 'Hcrit', Hcrit(j)
+        !print*, 'Hcrit', Hcrit(j)
     enddo
 
     !Mortality relates to Light Competition 
@@ -160,24 +161,24 @@ program light_competition
         sum_nind = sum_nind+nind(j)
     enddo
     
-    print*, 'NIND_SUM', sum_nind
-    print*, 'SUM-FPC-GRID-PERC', sum_FPCgrid_perc
-    print*, 'SUM-FPC-GRID', sum_FPCgrid
+    !print*, 'NIND_SUM', sum_nind
+    !print*, 'SUM-FPC-GRID-PERC', sum_FPCgrid_perc
+    !print*, 'SUM-FPC-GRID', sum_FPCgrid
 
     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!     
     
     !Percentage of tree population reduction in all area: (IAP-DGVM; Zeng et al., 2014) - !ATTENTION!
     mort_occupation = (1.-(95/sum_FPCgrid)) *sum_nind
-    print*, '*******mort_light', mort_occupation
+    !print*, '*******mort_light', mort_occupation
 
     !!!!testing the reduction in individuals number!!!
     do j=1,npls
 
 		FPCgrid_updt(j)=FPCgrid(j)-FPCgrid(j)*(mort_occupation/100)
-		print*, 'FPC with mort_occupation', FPCgrid_updt(j)
+		!print*, 'FPC with mort_occupation', FPCgrid_updt(j)
 
         FPCgrid_perc_updt(j) = (FPCgrid_updt(j)*100)/gc_area
-        print*, 'FPC-GRID-PERC with mort_occupation', FPCgrid_perc_updt(j), gc_area
+        !print*, 'FPC-GRID-PERC with mort_occupation', FPCgrid_perc_updt(j), gc_area
     enddo	
 
     
@@ -186,33 +187,33 @@ program light_competition
         sum_FPCgrid_updt = sum_FPCgrid_updt+FPCgrid_updt(j)
         sum_FPCgrid_perc_updt = sum_FPCgrid_perc_updt+FPCgrid_perc_updt(j)
     enddo
-    print*, 'sumfpc updated', sum_FPCgrid_updt
-    print*, 'sumfpc_perc updated', sum_FPCgrid_perc_updt
+    !print*, 'sumfpc updated', sum_FPCgrid_updt
+    !print*, 'sumfpc_perc updated', sum_FPCgrid_perc_updt
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	!!!!testing LPJ equation!!!!!
 	mort_LPJ=((mort_max)*(par_min/k_par)*(exp(-5*(1-(sum_FPCgrid_perc/100)))))*100
-	print*, '*************mort_LPJ', mort_LPJ, sum_FPCgrid_perc
+	!print*, '*************mort_LPJ', mort_LPJ, sum_FPCgrid_perc
 
 ! Layer's dynamics
 
     max_height = maxval(height)
-    print*, 'max_height',max_height
+    ! print*, 'max_height',max_height
     
     num_layer = nint(max_height/5)
-    print*, 'num_layer',num_layer
+    ! print*, 'num_layer',num_layer
 
     allocate(layer(1:num_layer))
     
     last_with_pls=num_layer
 
     layer_size = max_height/num_layer
-    print*, 'layer_size', layer_size
+    ! print*, 'layer_size', layer_size
 
     layer(i)%layer_height=0
 
     do i=1,num_layer
         layer(i)%layer_height=layer_size*i
-        print*, 'layer_height',layer(i)%layer_height, i
+        ! print*, 'layer_height',layer(i)%layer_height, i
     enddo
 
     layer(i)%num_height=0
@@ -247,16 +248,16 @@ program light_competition
 
         layer(i)%mean_LAI=layer(i)%sum_LAI/&
             &layer(i)%num_height
-             !print*,'mean_LAI',layer(i)%mean_LAI
+             print*,'mean_LAI',layer(i)%mean_LAI
 
         if(layer(i)%sum_LAI.eq.0.) then
             layer(i)%mean_LAI=0.
-             !print*, 'mean_LAI2', layer(i)%mean_LAI
+            !  print*, 'mean_LAI2', layer(i)%mean_LAI
         endif
         
-        print*,'lyr',i,'mean_height',&
-            &layer(i)%mean_height,'lai',&
-            &layer(i)%mean_LAI
+        ! print*,'lyr',i,'mean_height',&
+        !     &layer(i)%mean_height,'lai',&
+        !     &layer(i)%mean_LAI
     enddo
 
     layer(i)%li = 0
@@ -268,16 +269,16 @@ program light_competition
 !Light Extinction
 
     short_rad = watt_rs*1000.
-    !print*,'short_rad',short_rad
+    ! print*,'short_rad',short_rad
 
     incidence_rad = 0.5*short_rad
-    !print*,'APAR', incidence_rad
+    ! print*,'APAR', incidence_rad
 
 !=================== TEST ====================
     do i=num_layer,1,-1
         layer(i)%beers_law = incidence_rad*&
             &(1-exp(-0.5*layer(i)%mean_LAI))
-         print*,'law',layer(i)%beers_law
+        !  print*,'law',layer(i)%beers_law
     enddo
 !=============================================
 
@@ -300,8 +301,8 @@ program light_competition
         
         layer(i)%la = layer(i)%li - layer(i)%lu
 
-        print*,i, 'inc', layer(i)%li, 'used', layer(i)%lu,& 
-            &'avai', layer(i)%la
+        ! print*,i, 'inc', layer(i)%li, 'used', layer(i)%lu,& 
+        !     & 'avai', layer(i)%la
 
     enddo
     

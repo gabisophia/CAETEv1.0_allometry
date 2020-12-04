@@ -3,7 +3,7 @@ module constants
     implicit none
 
     !==============================!
-    != Constants
+    != Constants to allometry logic
     !==============================!
     real(REAL64), parameter :: klatosa = 6000.0
     real(REAL64), parameter :: dw = 200.0
