@@ -2,6 +2,8 @@
 
 ! Write by Bianca Rius, Bárbara Cardeli and Caio Fascina
 
+! ###################################################################################
+
 program light_competition
 
     type :: layer_array
