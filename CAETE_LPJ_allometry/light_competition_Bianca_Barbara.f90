@@ -47,7 +47,7 @@ program light_competition
     real :: spec_leaf = 15.365607091853349 !specific leaf area (variant trait) generic value to calculate leaf area index (LAI) value from Philip's code (Allocation.py)
     real :: sum_FPCgrid=0.0
     real :: sum_FPCgrid_perc=0.0
-    real :: sum_nind=0.0
+    real :: sum_nind=0.0 !grid-cell property (sum of ind of all PLS)
     real :: mort_occupation=0.0
     real :: gc_area = 300 !grid cell size - 300 m2 FOR TESTING PURPOSE (the real value will be 1ha or 10000 m2)
     real :: gc_area_95 = 0. !95% of grid cell size 
@@ -115,7 +115,7 @@ program light_competition
         nind(j) = diam(j)**(-1.6)
         print*, 'Nind', nind(j)
 
-        FPCind(j) = (1-exp(-0.5*LAI(j)))
+        FPCind(j) = (1-exp(-0.5*LAI(j))) !de cada PLS
         print*, 'FPC', FPCind(j)
 
         FPCgrid(j) = crown_area(j)*nind(j)*FPCind(j)
@@ -167,7 +167,7 @@ program light_competition
     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!     
     
     !Percentage of tree population reduction in all area: (IAP-DGVM; Zeng et al., 2014) - !ATTENTION!
-    mort_occupation = (1.-(95/sum_FPCgrid)) *sum_nind
+    mort_occupation = (1.-(95/sum_FPCgrid_perc)) *sum_nind
     print*, '*******mort_light', mort_occupation
 
     !!!!testing the reduction in individuals number!!!

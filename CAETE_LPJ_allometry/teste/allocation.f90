@@ -3,16 +3,22 @@ module allocation
     use constants
     implicit none
 
-    real(REAL64) :: H = 0.0
-    real(REAL64) :: L = 0.0
-    real(REAL64) :: R = 0.0
-    real(REAL64) :: S = 0.0
+    ! real(REAL64) :: H = 0.0
+    ! real(REAL64) :: L = 0.0
+    ! real(REAL64) :: R = 0.0
+    ! real(REAL64) :: S = 0.0
 
-    ! real(REAL64) :: H = 108.91909828977032 !HEARTWOOD - SOMENTE PARA TESTES (Valores: Cod. Philipe)
-    ! real(REAL64) :: L = 1.2279169651518438 !LEAF BIOMASS - SOMENTE PARA TESTES (Valores: Cod. Philipe)
-    ! real(REAL64) :: S = 29.790591253578555 !SAPWOOD - SOMENTE PARA TESTES (Valores: Cod. Philipe)
-    ! real(REAL64) :: R = 0.88026193814051623 !ROOT BIOMASS - SOMENTE PARA TESTES (Valores: Cod. Philipe)
+    real(REAL64) :: H = 18.91909828977032 !HEARTWOOD - SOMENTE PARA TESTES (Valores: Cod. Philipe)
+    real(REAL64) :: L = 1.2279169651518438 !LEAF BIOMASS - SOMENTE PARA TESTES (Valores: Cod. Philipe)
+    real(REAL64) :: S = 29.790591253578555 !SAPWOOD - SOMENTE PARA TESTES (Valores: Cod. Philipe)
+    real(REAL64) :: R = 0.88026193814051623 !ROOT BIOMASS - SOMENTE PARA TESTES (Valores: Cod. Philipe)
     
+    real(REAL64) :: stem = 0.0   !stem (heartwood + sapwood) pool update 
+    real(REAL64) :: L_updt = 0.0 !Leaf pool update (L year before + delta_heartwood)
+    real(REAL64) :: S_updt = 0.0 !Sapwood pool update (S year before + delta_heartwood)
+    real(REAL64) :: R_updt = 0.0 !Root pool update (R year before + delta_heartwood)
+    
+
     contains
 
     !==============================!
@@ -67,6 +73,48 @@ module allocation
         
         return
     end subroutine sapwood_carbon
+
+    !Updating carboon pools with the deltas 
+    subroutine updating_pool_leaf(delta_leaf,L,L_updt)
+        real(REAL64) :: delta_leaf
+        real(REAL64) :: L 
+        real(REAL64) :: L_updt
+
+        L_updt = delta_leaf + L
+
+        return
+    end subroutine updating_pool_leaf
+
+  
+    subroutine updating_pool_root(delta_root,R,R_updt)
+        real(REAL64) :: delta_root
+        real(REAL64) :: R
+        real(REAL64) :: R_updt
+
+        R_updt = delta_root + R
+
+        return
+    end subroutine updating_pool_root
+
+    subroutine updating_pool_sapwood(delta_sapwood,S,S_updt)
+        real(REAL64) :: delta_sapwood
+        real(REAL64) :: S
+        real(REAL64) :: S_updt
+
+        S_updt = delta_sapwood + S
+
+        return
+    end subroutine updating_pool_sapwood
+
+    subroutine updating_pool_stem(S_updt, H, stem)
+        real(REAL64) :: S_updt
+        real(REAL64) :: H
+        real(REAL64) :: stem
+
+        stem = S_updt + H
+
+        return
+    end subroutine updating_pool_stem
 
 	!==============================!
 	!= Functions
@@ -139,5 +187,7 @@ module allocation
         
          SS = S + bminc - L / ltor + R
      end function sapwood
+
+     
 
 end module allocation

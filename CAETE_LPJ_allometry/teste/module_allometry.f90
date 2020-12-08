@@ -11,7 +11,7 @@ module allometry
 		real(REAL64) :: diameter 
 		real(REAL64) :: dw 
 		real(REAL64) :: pi
-		real(REAL64) :: delta_sapwood !Deve ser o valor de carbono total no sapwood.
+		real(REAL64) :: delta_sapwood !ATENÇÃOOO!!!!!Deve ser o valor de carbono total no sapwood.
 
 		diameter = ((4 + (delta_sapwood)) / ((dw) * pi * 40)) **&
 		&(1 / (2 + 0.5))
