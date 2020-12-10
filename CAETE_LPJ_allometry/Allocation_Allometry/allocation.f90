@@ -17,9 +17,10 @@ module allocation
     real(REAL64) :: L_updt = 0.0 !Leaf pool update (L year before + delta_heartwood)
     real(REAL64) :: S_updt = 0.0 !Sapwood pool update (S year before + delta_heartwood)
     real(REAL64) :: R_updt = 0.0 !Root pool update (R year before + delta_heartwood)
-    real(REAL64) :: turnover_sap = 0.0 !Sapwood turnover to heartwood (for year - Smith et al., 2001)
-    
-
+    real(REAL64) :: H_updt = 0.0 !heartwood pool update (R year before + delta_heartwood)
+    real(REAL64) :: turnover_sap = 0.0 !Sapwood turnover to heartwood (yr-1; Sitch et al 2003)
+    real(REAL64) :: turnover_leaf = 0.0 !Leaf turnover (yr-1; Sitch et al 2003) 
+    real(REAL64) :: turnover_root = 0.0 !Root turnover (yr-1; Sitch et al 2003) 
     contains
 
     !==============================!
@@ -45,27 +46,27 @@ module allocation
     ! end subroutine show_consts
 
     ! Use the bisection method to solve the leaf mass increment
-    subroutine leaf_carbon(delta_leaf)
+    subroutine leaf_increment(delta_leaf)
         real(REAL64) :: delta_leaf
 
         delta_leaf = bisection_method(0.0, 10.0)
         
         return
-    end subroutine leaf_carbon
+    end subroutine leaf_increment
 
 	! Once we have the leaf mass increment we can cant get 
     ! root mass increment based on the LTOR constant
-    subroutine root_carbon(delta_leaf, delta_root)
+    subroutine root_increment(delta_leaf, delta_root)
         real(REAL64) :: delta_leaf
         real(REAL64) :: delta_root
         
         delta_root = (delta_leaf + L) / ltor - R
         
         return
-    end subroutine root_carbon
+    end subroutine root_increment
 
     ! Finally using the cmass_increment mass conservation we can calculate sapwood increment
-    subroutine sapwood_carbon(delta_leaf, delta_root, delta_sapwood)
+    subroutine sapwood_increment(delta_leaf, delta_root, delta_sapwood)
         real(REAL64) :: delta_leaf
         real(REAL64) :: delta_root
         real(REAL64) :: delta_sapwood
@@ -73,63 +74,74 @@ module allocation
         delta_sapwood = bminc - delta_leaf - delta_root
         
         return
-    end subroutine sapwood_carbon
+    end subroutine sapwood_increment
 
-    !Updating carbon pools in each compartments with the deltas (this part go to allometry dynamic)
+    !Updating carbon pools in each compartments with the deltas and turnover (this part go to allometry dynamic)
 
-    subroutine updating_pool_leaf(delta_leaf,L,L_updt)
+    subroutine updating_pool_leaf(delta_leaf,L,L_updt,turnover_leaf,turnover_rate_leaf)
         real(REAL64) :: delta_leaf
         real(REAL64) :: L 
         real(REAL64) :: L_updt
-
+        real(REAL64) :: turnover_leaf 
+        real(REAL64) :: turnover_rate_leaf
         
+        turnover_leaf = L*turnover_rate_leaf
 
-        L_updt = delta_leaf  + L 
+        L_updt = delta_leaf  + L - turnover_leaf
 
         return
     end subroutine updating_pool_leaf
 
   
-    subroutine updating_pool_root(delta_root,R,R_updt)
+    subroutine updating_pool_root(delta_root,R,R_updt,turnover_root,turnover_rate_root)
         real(REAL64) :: delta_root
         real(REAL64) :: R
         real(REAL64) :: R_updt
+        real(REAL64) :: turnover_root 
+        real(REAL64) :: turnover_rate_root
 
-        R_updt = delta_root + R
+        turnover_root = R*turnover_rate_root
+
+        R_updt = delta_root + R - turnover_root
 
         return
     end subroutine updating_pool_root
 
-    subroutine updating_pool_sapwood(delta_sapwood,S,S_updt)
+    subroutine updating_pool_sapwood(delta_sapwood,S,S_updt,turnover_sap,turnover_rate_sap)
         real(REAL64) :: delta_sapwood
         real(REAL64) :: S
         real(REAL64) :: S_updt
+        real(REAL64) :: turnover_sap 
+        real(REAL64) :: turnover_rate_sap 
 
-        S_updt = delta_sapwood + S
+        turnover_sap = S*turnover_rate_sap
+
+        S_updt = delta_sapwood + S - turnover_sap
 
         return
     end subroutine updating_pool_sapwood
 
-    subroutine updating_pool_stem(S_updt, H, stem)
-        real(REAL64) :: S_updt
+    subroutine updating_pool_heartwood(H,turnover_sap,H_updt)
+
         real(REAL64) :: H
+        real(REAL64) :: turnover_sap
+        real(REAL64) :: H_updt
+       
+        H_updt = H + turnover_sap
+
+        return
+    end subroutine updating_pool_heartwood
+
+    subroutine updating_pool_stem(S_updt, H_updt, stem)
+        real(REAL64) :: S_updt
+        real(REAL64) :: H_updt
         real(REAL64) :: stem
 
-        stem = S_updt + H
+        stem = S_updt + H_updt
 
         return
     end subroutine updating_pool_stem
 
-    subroutine updating_turnover_sap(S_updt, H, turnover_sap)
-        real(REAL64) :: S_updt
-        real(REAL64) :: H
-        real(REAL64) :: turnover_sap
-        !the value of 0.1 represent the rate of sapwood turnover in each year (table 2, Smith et al., 2001)
-
-        turnover_sap = H + (S_updt * 0.1)
-
-        return
-    end subroutine updating_turnover_sap
 
 	!==============================!
 	!= Functions
