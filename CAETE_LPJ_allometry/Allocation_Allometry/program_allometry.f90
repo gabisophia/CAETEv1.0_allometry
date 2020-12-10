@@ -10,17 +10,22 @@ program allometry_2
  real(REAL64):: h2
  real(REAL64):: leaf
  real(REAL64):: delta_leaf
+ real(REAL64):: delta_root
+ real(REAL64):: delta_sapwood
+
+ 
+
+ call leaf_carbon(delta_leaf)
+ call root_carbon(delta_leaf,delta_root)
+ call sapwood_carbon(delta_leaf,delta_root,delta_sapwood)
+ 
+ call updating_pool_sapwood(delta_sapwood,S,S_updt)
 
  call updating_pool_stem(S_updt, H, stem)
  print*, 'CARBON ON STEM =', stem
 
  call updating_pool_leaf(delta_leaf,L,L_updt)
- print*, 'CARBON ON LEAF =', L_updt
-
-!  call leaf_carbon(delta_leaf)
-!  call root_carbon(delta_leaf,delta_root)
-!  call sapwood_carbon(delta_leaf,delta_root,delta_sapwood)
-!  print*,'delta_leaf=', delta_leaf,'delta_root=',delta_root,'delta_sapwood=', delta_sapwood
+ print*, 'CARBON ON LEAF =', delta_leaf, L, L_updt
  
  diameter = diam(dw,pi,stem)
  print*, 'DIÂMETRO DO CAULE =', diameter

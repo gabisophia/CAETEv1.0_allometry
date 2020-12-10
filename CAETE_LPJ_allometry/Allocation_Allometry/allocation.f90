@@ -8,7 +8,7 @@ module allocation
     ! real(REAL64) :: R = 0.0
     ! real(REAL64) :: S = 0.0
 
-    real(REAL64) :: H = 18.91909828977032 !HEARTWOOD - SOMENTE PARA TESTES (Valores: Cod. Philipe)
+    real(REAL64) :: H = 18.91909828977032 !in kgC/m2 --> /densindiv (numindv/m2) !HEARTWOOD - SOMENTE PARA TESTES (Valores: Cod. Phillip)
     real(REAL64) :: L = 1.2279169651518438 !LEAF BIOMASS - SOMENTE PARA TESTES (Valores: Cod. Philipe)
     real(REAL64) :: S = 29.790591253578555 !SAPWOOD - SOMENTE PARA TESTES (Valores: Cod. Philipe)
     real(REAL64) :: R = 0.88026193814051623 !ROOT BIOMASS - SOMENTE PARA TESTES (Valores: Cod. Philipe)
@@ -82,7 +82,9 @@ module allocation
         real(REAL64) :: L 
         real(REAL64) :: L_updt
 
-        L_updt = delta_leaf + L
+        
+
+        L_updt = delta_leaf  + L 
 
         return
     end subroutine updating_pool_leaf
