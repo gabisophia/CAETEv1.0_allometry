@@ -8,7 +8,7 @@ module constants
     != Constants
     !==============================!
     real(REAL64), parameter :: klatosa = 6000.0
-    real(REAL64), parameter :: dw = 0.2*1000 !(*1000) converte de g/cm3 para kg/m3
+    real(REAL64), parameter :: dw = 200 !(*1000) converte de g/cm3 para kg/m3
     real(REAL64), parameter :: ltor = 0.77302587552347657
     real(REAL64), parameter :: k_allom1 = 100.0 !allometric constant (Table 3; Sitch et al., 2003)
     real(REAL64), parameter :: k_allom2 = 36.0

@@ -73,23 +73,23 @@ program light_competition
     real, dimension(npls) :: carbon_leaf !KgC/m2 
     real, dimension(npls) :: spec_leaf
 
-    !dwood=(/0.74,0.73,0.59,0.52,0.41,0.44,0.86,0.42,0.64,0.69,0.92,0.60,0.36,0.99/) !atenção para a unidade
-    !carbon_leaf=(/2.15,3.,1.18,1.6,1.5,1.8,0.3,2.,0.8,.84,0.25,1.,0.2,1.7/)
-    !spec_leaf=(/15.35,10.1,10.7,11.2,12.,14.1,13.7,11.5,12.2,10.,12.,11.,13.,14./)
+    dwood=(/0.74,0.73,0.59,0.52,0.41,0.44,0.86,0.42,0.64,0.69,0.92,0.60,0.36,0.99/) !atenção para a unidade
+    carbon_leaf=(/2.15,3.,1.18,1.6,1.5,1.8,0.3,2.,0.8,.84,0.25,1.,0.2,1.7/)
+    spec_leaf=(/15.35,10.1,10.7,11.2,12.,14.1,13.7,11.5,12.2,10.,12.,11.,13.,14./)
 
 ! Allometric Equations
-
+    
     diam = ((4+(carbon_stem))/((dwood)*3.14*40))**(1/(2+0.5))
     print*, 'diam', diam
 
     height = k_allom2*(diam**k_allom3)
     print*, 'height', height
     
-    !crown_area = k_allom1*(diam**krp)
-    !print*, 'crown', crown_area
+    crown_area = k_allom1*(diam**krp)
+    print*, 'crown', crown_area
 
-    !LAI = (carbon_leaf*spec_leaf)/crown_area
-    !print*, 'LAI', LAI
+    LAI = (carbon_leaf*spec_leaf)/crown_area
+    print*, 'LAI', LAI
 
  
 

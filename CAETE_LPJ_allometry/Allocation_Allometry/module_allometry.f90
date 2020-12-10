@@ -13,7 +13,7 @@ module allometry
 		real(REAL64) :: pi
 		real(REAL64) :: stem !CARBON ON SAPWOOD UPDATED - Allocation.f90 code
 
-		diameter = ((4+(stem))/((dw/1000.)*3.14*40))**(1/(2+0.5)) !dw/1000 is to return to the unit g/cm3
+		diameter = ((4+(stem))/((dw/1000.)*pi*40))**(1/(2+0.5)) !dw/1000 is to return to the unit g/cm3
 		
 	end function diam
 

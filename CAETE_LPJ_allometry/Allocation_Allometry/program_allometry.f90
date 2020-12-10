@@ -15,16 +15,20 @@ program allometry_2
 
  
 
- call leaf_carbon(delta_leaf)
- call root_carbon(delta_leaf,delta_root)
- call sapwood_carbon(delta_leaf,delta_root,delta_sapwood)
- 
- call updating_pool_sapwood(delta_sapwood,S,S_updt)
+ call leaf_increment(delta_leaf)
 
- call updating_pool_stem(S_updt, H, stem)
+ call root_increment(delta_leaf,delta_root)
+ 
+ call sapwood_increment(delta_leaf,delta_root,delta_sapwood)
+
+ call updating_pool_heartwood(H,turnover_sap,H_updt)
+ 
+ call updating_pool_sapwood(delta_sapwood,S,S_updt,turnover_sap,turnover_rate_sap)
+
+ call updating_pool_stem(S_updt, H_updt, stem)
  print*, 'CARBON ON STEM =', stem
 
- call updating_pool_leaf(delta_leaf,L,L_updt)
+ call updating_pool_leaf(delta_leaf,L,L_updt,turnover_leaf,turnover_rate_leaf)
  print*, 'CARBON ON LEAF =', delta_leaf, L, L_updt
  
  diameter = diam(dw,pi,stem)
