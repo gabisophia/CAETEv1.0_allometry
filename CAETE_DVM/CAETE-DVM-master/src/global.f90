@@ -99,6 +99,7 @@ module allometry_par
          dw = 200             ,&          !value for testing purpose (DW will be a variant trait)
          spec_leaf = 15.36    ,&          !value for testing purpose (SLA is already calculate in the model; SLA will be a variant trait)
          klatosa = 6000.0     ,&   
-         ltor = 0.77302587552347657
+         ltor = 0.77302587552347657 ,&
+         tol = 0.0000001
          
 end module allometry_par

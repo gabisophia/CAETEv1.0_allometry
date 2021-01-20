@@ -192,7 +192,10 @@ module alloc
       real(r_8) :: tau3
       real(r_8) :: SS
       real(r_8) :: searched_x
-      real(r_8) :: x = 1.0
+      real(r_8) :: x
+      real(r_8) :: delta_leaf
+      real(r_8) :: delta_root
+      real(r_8) :: delta_sapwood
       ! real(r_8) :: test_a = 1
       ! real(r_8) :: test_b = 2
 
@@ -216,6 +219,9 @@ module alloc
       tau3                   = 0.0D0
       SS                     = 0.0D0
       searched_x             = 0.0D0
+      delta_leaf             = 0.0D0
+      delta_root             = 0.0D0
+      delta_sapwood          = 0.0D0
 
       ! initialize uptake/carbon costs related variables
       nuptk                  = 0.0D0
@@ -289,6 +295,21 @@ module alloc
       root_p2c = dt(15)
       pdia = dt(16)
       amp = dt(17)
+
+      !TESTE - DELTAS - REVER UNIDADES.
+
+      ! Use the bisection method (function below) to solve the leaf mass increment
+      npp_leaf = bisection_method(0.0, 3.0)
+      !print*, 'DELTA LEAF =', delta_leaf
+
+      ! Once we have the leaf mass increment we can cant get 
+      ! root mass increment based on the LTOR constant
+      delta_root = (npp_leaf + scl1) / ltor - scf1
+      !print*, 'DELTA ROOT =', delta_root
+
+      ! Finally using the cmass_increment mass conservation we can calculate sapwood increment
+      delta_sapwood = npp_pot - npp_leaf - delta_root
+      !print*, 'DELTA SAPWOOD =', delta_sapwood
 
 
       ! If there is not nutrients or NPP then no allocation process
@@ -384,13 +405,13 @@ module alloc
       ! Partitioning NPP for CVEG pools
 
       ! POTENTIAL NPP FOR EACH POOL (WITH NO NUTRIENT LIMITATION)
-      npp_leaf =  aleaf * npp_pot    ! g(C)m⁻²
-      npp_root =  aroot * npp_pot    ! g(C)m⁻²
-      if (awood .gt. 0.0D0) then
-         npp_wood =  awood * npp_pot    ! g(C)m⁻²
-      else
-         npp_wood = 0.0
-      endif
+      ! npp_leaf =  aleaf * npp_pot    ! g(C)m⁻²
+      ! npp_root =  aroot * npp_pot    ! g(C)m⁻²
+      ! if (awood .gt. 0.0D0) then
+      !    npp_wood =  awood * npp_pot    ! g(C)m⁻²
+      ! else
+      !    npp_wood = 0.0
+      ! endif
 
       ! POTENTIAL NUTRIENT UPTAKE
       nscl = npp_leaf * leaf_n2c    ! NITROGEN TO ALLOCATE LEAF NPP g(N)m⁻²
@@ -910,8 +931,8 @@ module alloc
       &                   + n_cost_resorpt + p_cost_resorpt + negative_one
       ! END OF CALCULATIONS
 
-      teste_one = f(x)
-      print*, 'RESULTADO TESTE =', teste_one
+      ! teste_one = leaf_increment()
+      ! print*, 'RESULTADO TESTE/DELTA_LEAF =', teste_one
 
    contains
 
@@ -927,7 +948,34 @@ module alloc
          endif
       end function add_pool
 
-      !AUXILIARY FUNCTIONS TO ALLOCATION
+      !AUXILIARY FUNCTIONS TO ALLOCATION  - Bianca & Bárbara, 2021
+
+      function bisection_method(a, b) result(midpoint)
+
+         real(r_4) :: a, b
+         real(r_8) :: aux_a, aux_b
+         real(r_8) :: midpoint
+         
+         aux_a = a
+         aux_b = b
+ 
+         if((f(aux_a) * f(aux_b)) .gt. 0) then
+             midpoint = -2.0
+             return
+         endif
+         
+         do while((aux_b - aux_a) / 2.0 .gt. tol)
+             midpoint = (aux_a + aux_b) / 2
+             
+             if(f(midpoint) .eq. 0.0) then
+                 exit            
+             elseif(f(aux_a) * f(midpoint) .lt. 0) then
+                 aux_b = midpoint
+             else
+                 aux_a = midpoint
+             endif
+         end do
+      end function bisection_method
 
       function f(x) result(searched_x)
 
