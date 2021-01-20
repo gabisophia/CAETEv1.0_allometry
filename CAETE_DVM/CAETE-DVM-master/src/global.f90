@@ -87,3 +87,18 @@ module photo_par
         e_vpm = 60592.0D0    ,&          ! Arrhenius eq. constant
         kp25 = 82.0D0                    ! µmol mol-1 (ppm)  MM constant PEPcase at
 end module photo_par
+
+module allometry_par
+   use types, only : r_8
+   implicit none
+
+   real(r_8), public, parameter ::       &
+         k_allom1 = 100.0     ,&          !allometric constant (Table 3; Sitch et al., 2003)
+         k_allom2 = 36.0      ,&
+         k_allom3 = 0.22      ,&
+         dw = 200             ,&          !value for testing purpose (DW will be a variant trait)
+         spec_leaf = 15.36    ,&          !value for testing purpose (SLA is already calculate in the model; SLA will be a variant trait)
+         klatosa = 6000.0     ,&   
+         ltor = 0.77302587552347657
+         
+end module allometry_par

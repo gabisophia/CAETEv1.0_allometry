@@ -22,6 +22,7 @@ module alloc
                           & retran_nutri_cost, select_active_strategy
     use global_par, only: ntraits, sapwood
     use photo, only: f_four, spec_leaf_area, realized_npp
+    use allometry_par
     use IEEE_ARITHMETIC
 
     implicit none
@@ -183,6 +184,18 @@ module alloc
       real(r_8) :: negative_one
       real(r_8) :: aux_on, aux_sop, aux_op
 
+      !ALLOMETRY VARIABLES
+      
+      real(r_8) :: teste_one
+      real(r_8) :: tau1
+      real(r_8) :: tau2
+      real(r_8) :: tau3
+      real(r_8) :: SS
+      real(r_8) :: searched_x
+      real(r_8) :: x = 1.0
+      ! real(r_8) :: test_a = 1
+      ! real(r_8) :: test_b = 2
+
 
       ! initialize ALL outputs
       storage_out_alloc            = (/0.0D0, 0.0D0, 0.0D0/)
@@ -198,6 +211,11 @@ module alloc
       phosphorus_uptake(:)   = 0.0D0
       limiting_nutrient(:)   = 0
       uptk_strategy(:)       = 0
+      tau1                   = 0.0D0
+      tau2                   = 0.0D0
+      tau3                   = 0.0D0
+      SS                     = 0.0D0
+      searched_x             = 0.0D0
 
       ! initialize uptake/carbon costs related variables
       nuptk                  = 0.0D0
@@ -892,6 +910,9 @@ module alloc
       &                   + n_cost_resorpt + p_cost_resorpt + negative_one
       ! END OF CALCULATIONS
 
+      teste_one = f(x)
+      print*, 'RESULTADO TESTE =', teste_one
+
    contains
 
       function add_pool(a1, a2) result(new_amount)
@@ -905,6 +926,61 @@ module alloc
             new_amount = a1
          endif
       end function add_pool
+
+      !AUXILIARY FUNCTIONS TO ALLOCATION
+
+      function f(x) result(searched_x)
+
+         real(r_8) :: x
+         real(r_8) :: searched_x
+
+         !SCA1 = ABOVEGROUND WOOD TISSUES PORÉM É UTILIZADO >SOMENTE< HEARTWOOD
+         
+         searched_x = & 
+             calc_tau1() * &
+             (sapwood2() - x - x / ltor + sca1) - &
+             ( &
+                 (sapwood2() - x - x / ltor) / &
+                 (scl1 + x) * calc_tau3() &
+             ) ** calc_tau2()
+      end function f
+
+      function calc_tau1() result(tau1)
+
+         real(r_8) :: tau1
+         
+         tau1 = k_allom2 ** ((2.0 / k_allom3) * 4.0 / 3.14159 / dw)
+      end function calc_tau1
+
+      function calc_tau2() result(tau2)
+
+         real(r_8) :: tau2 
+         
+         tau2 = 1.0 + 2.0 / k_allom3
+      end function calc_tau2
+      
+      function calc_tau3() result(tau3)
+
+         real(r_8) :: tau3
+         
+         tau3 = klatosa / dw / spec_leaf
+      end function calc_tau3
+
+      function sapwood2() result (SS) !The variable sapwood already exist then sapwood2 will be changed in the future
+   
+         real(r_8) :: SS
+        
+         SS = sca1 + npp_pot - scl1 / ltor + scf1
+      end function sapwood2
+
+      ! function teste (test_a, test_b) result (test_c)
+      !    real(r_8), intent(in) :: test_a
+      !    real(r_8), intent(in) :: test_b
+      !    real(r_8) :: test_c
+
+      !    test_c = test_a + test_b
+
+      ! end function teste
 
    end subroutine allocation
 
