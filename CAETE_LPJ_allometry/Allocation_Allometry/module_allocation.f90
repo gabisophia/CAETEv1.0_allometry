@@ -8,6 +8,8 @@ module allocation
     ! real(REAL64) :: R = 0.0
     ! real(REAL64) :: S = 0.0
 
+    !the 1st thing to do is to calculate the potential npp, verify the nutrients availability
+
     real(REAL64) :: H = 18.91909828977032 !in kgC/m2 --> /densindiv (numindv/m2) !HEARTWOOD - SOMENTE PARA TESTES (Valores: Cod. Phillip)
     real(REAL64) :: L = 1.2279169651518438 !LEAF BIOMASS - SOMENTE PARA TESTES (Valores: Cod. Philipe)
     real(REAL64) :: S = 29.790591253578555 !SAPWOOD - SOMENTE PARA TESTES (Valores: Cod. Philipe)

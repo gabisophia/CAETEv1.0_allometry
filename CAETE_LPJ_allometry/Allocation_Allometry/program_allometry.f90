@@ -15,7 +15,7 @@ program allometry_2
 
  
 
- call leaf_increment(delta_leaf)
+ call leaf_increment(delta_leaf) 
 
  call root_increment(delta_leaf,delta_root)
  
