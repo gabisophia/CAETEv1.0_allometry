@@ -298,9 +298,7 @@ module alloc
 
       !TESTE - DELTAS - REVER UNIDADES.
 
-      ! Use the bisection method (function below) to solve the leaf mass increment
-      npp_leaf = bisection_method(0.0, 3.0)
-      !print*, 'DELTA LEAF =', delta_leaf
+     
 
       ! Once we have the leaf mass increment we can cant get 
       ! root mass increment based on the LTOR constant
@@ -405,13 +403,17 @@ module alloc
       ! Partitioning NPP for CVEG pools
 
       ! POTENTIAL NPP FOR EACH POOL (WITH NO NUTRIENT LIMITATION)
-      ! npp_leaf =  aleaf * npp_pot    ! g(C)m⁻²
-      ! npp_root =  aroot * npp_pot    ! g(C)m⁻²
-      ! if (awood .gt. 0.0D0) then
-      !    npp_wood =  awood * npp_pot    ! g(C)m⁻²
-      ! else
-      !    npp_wood = 0.0
-      ! endif
+
+      ! Use the bisection method (function below) to solve the leaf mass increment
+      npp_leaf = bisection_method(0.0, 3.0) !the new allocation logic, considering allometry
+      !print*, 'DELTA LEAF =', delta_leaf
+      ! npp_leaf =  aleaf * npp_pot    ! g(C)m⁻² !old logic.
+      npp_root =  aroot * npp_pot    ! g(C)m⁻² !old logic.
+      if (awood .gt. 0.0D0) then  !old logic.
+         npp_wood =  awood * npp_pot    ! g(C)m⁻² !old logic.
+      else
+         npp_wood = 0.0 !old logic.
+      endif
 
       ! POTENTIAL NUTRIENT UPTAKE
       nscl = npp_leaf * leaf_n2c    ! NITROGEN TO ALLOCATE LEAF NPP g(N)m⁻²
