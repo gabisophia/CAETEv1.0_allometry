@@ -298,13 +298,6 @@ module alloc
 
       !TESTE - DELTAS - REVER UNIDADES.
 
-     
-
-      ! Once we have the leaf mass increment we can cant get 
-      ! root mass increment based on the LTOR constant
-      delta_root = (npp_leaf + scl1) / ltor - scf1
-      !print*, 'DELTA ROOT =', delta_root
-
       ! Finally using the cmass_increment mass conservation we can calculate sapwood increment
       delta_sapwood = npp_pot - npp_leaf - delta_root
       !print*, 'DELTA SAPWOOD =', delta_sapwood
@@ -406,9 +399,14 @@ module alloc
 
       ! Use the bisection method (function below) to solve the leaf mass increment
       npp_leaf = bisection_method(0.0, 3.0) !the new allocation logic, considering allometry
-      !print*, 'DELTA LEAF =', delta_leaf
+
+      ! Once we have the leaf mass increment we can cant get 
+      ! root mass increment based on the LTOR constant
+      npp_root = (npp_leaf + scl1) / ltor - scf1
+
       ! npp_leaf =  aleaf * npp_pot    ! g(C)m⁻² !old logic.
-      npp_root =  aroot * npp_pot    ! g(C)m⁻² !old logic.
+      ! npp_root =  aroot * npp_pot    ! g(C)m⁻² !old logic.
+
       if (awood .gt. 0.0D0) then  !old logic.
          npp_wood =  awood * npp_pot    ! g(C)m⁻² !old logic.
       else
@@ -510,7 +508,7 @@ module alloc
       !WOOD!     NPP          !       NPP     !
       !ROOT!     NPP          !       NPP     !
 
-      real_npp(:,:) = 0.0D0
+      real_npp(:,:) = 0.0D0 !NPP CONSIDERING ALL LIMITATIONS
       is_limited(:,:) = .false.
 
       ! FIND REALIZED NPP
@@ -921,12 +919,12 @@ module alloc
       ! END RETRANSLOCATION CALCULATIONS
 
       ! Finalize
-      scl2 = scl2 * 1.0D-3
-      scf2 = scf2 * 1.0D-3
+      scl2 = scl2 * 1.0D-3 !TRANSFOR FROM G/M2 TO KG/M2
+      scf2 = scf2 * 1.0D-3 !TRANSFOR FROM G/M2 TO KG/M2
       if(awood .gt. 0.0D0) then
-         sca2 = sca2 * 1.0D-3
+         sca2 = sca2 * 1.0D-3 !TRANSFOR FROM G/M2 TO KG/M2
       else
-         sca2 = 0.0D0
+         sca2 = 0.0D0 !TRANSFOR FROM G/M2 TO KG/M2
       endif
 
       c_costs_of_uptake = active_nupt_cost + active_pupt_cost &
