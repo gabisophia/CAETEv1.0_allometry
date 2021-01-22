@@ -1354,3 +1354,26 @@ contains
   !=================================================================
 
 end module water
+
+module allometry 
+   use allometry_par
+
+   public ::                    &
+        diameter               ,& ! (f) tree diameter in m.
+        area_crown             ,& ! (f) tree area crown in m2.
+        tree_height               ! (f) in m.
+
+contains 
+
+! function diameter (dw, pi, sca2) result (diam) 
+    
+!    real(r_8), intent(in) :: dw !NA GLOBAL ESTA 200g
+!    real(r_8), intent(in) :: pi
+!    real(r_8), intent(in) :: sca2 !CARBON ON SAPWOOD UPDATED - Allocation.f90 code
+!    real(r_8) :: diameter
+
+!    diam = ((4*(stem/1000))/((200000)*pi*40))**(1/(2+0.5)) !dw/1000 is to return to the unit g/cm3 
+   
+! end function diameter
+
+end module allometry
