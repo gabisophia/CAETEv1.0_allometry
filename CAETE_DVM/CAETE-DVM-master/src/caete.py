@@ -600,6 +600,7 @@ class grd:
                         (days - count_days)
 
                 co2 += next_year
+                    
 
                 # Update soil temperature
                 self.soil_temp = st.soil_temp(self.soil_temp, temp[step])

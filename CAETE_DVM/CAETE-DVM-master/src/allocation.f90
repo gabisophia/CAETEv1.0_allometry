@@ -931,8 +931,9 @@ module alloc
       &                   + n_cost_resorpt + p_cost_resorpt + negative_one
       ! END OF CALCULATIONS
 
-      ! teste_one = leaf_increment()
+      ! teste_one = diameter(dw, k_allom2, k_allom3, pi, sca2)
       ! print*, 'RESULTADO TESTE/DELTA_LEAF =', teste_one
+
 
    contains
 
@@ -1033,3 +1034,69 @@ module alloc
    end subroutine allocation
 
 end module alloc
+
+module allometry 
+
+   use types, only : r_8
+   use allometry_par
+   use alloc
+
+   real(r_8) :: test_diameter
+   real(r_8) :: diam
+   real(r_8) :: crown_area
+   real(r_8) :: height
+
+   ! test_diameter = diameter(dw, k_allom2, k_allom3, pi, sca2)
+   ! print*, 'DIAMETER =', test_diameter
+
+contains 
+
+   function diameter (dw, k_allom2, k_allom3, pi, sca2) result (diam)
+      !Returns in tree diameter in m.
+ 
+      real(r_8), intent(in) :: dw 
+      real(r_8), intent(in) :: k_allom2
+      real(r_8), intent(in) :: k_allom3 
+      real(r_8), intent(in) :: pi
+      real(r_8), intent(in) :: sca2 !final carbon content on aboveground woody biomass compartment (KgC/m2)
+      real(r_8) :: diam
+
+      diam = ((4*(sca2*1.0D3))/((dw*1.0D6)*pi*k_allom2))**&
+      &(1/(2+k_allom3)) !dw/1000 is to return to the unit g/cm3 
+
+      !1.0D3 - Transforma a quantidade de C no caule [sca2] de kgC/m2 para gC/m2 (Smith et al., 2001)
+      !1.0D6 - Transforma o wood density de g/cm-3 para g/m-3 (Smith et al., 2001)
+
+   end function diameter
+
+   !=================================================================
+   !=================================================================
+
+   function area_crown (k_allom1, krp, diam)  result (crown_area)
+      !Returns in tree crown area in m2.
+
+		real(r_8), intent(in) :: diam
+		real(r_8), intent(in) :: k_allom1
+		real(r_8), intent(in) :: krp
+		real(r_8) :: crown_area
+
+		crown_area = k_allom1*(diam**krp)
+
+   end function area_crown
+   
+   !=================================================================
+   !=================================================================
+
+   function tree_height (k_allom2, k_allom3, diam) result (height)
+      !Returns in tree height in m.
+      
+		real(r_8), intent(in) :: diam
+		real(r_8), intent(in) :: k_allom2
+		real(r_8), intent(in) :: k_allom3
+		real(r_8) :: height
+
+		height = k_allom2*(diam**k_allom3)
+
+	end function tree_height
+
+end module allometry
