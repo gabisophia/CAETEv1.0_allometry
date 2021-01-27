@@ -198,6 +198,8 @@ class grd:
         self.cleaf = None
         self.cawood = None
         self.cfroot = None
+        self.csap = None
+        self.cheart = None
         self.area = None
         self.wue = None
         self.cue = None
@@ -245,6 +247,8 @@ class grd:
         self.vp_cleaf = None
         self.vp_croot = None
         self.vp_cwood = None
+        self.vp_csap = None
+        self.vp_cheart = None
         self.vp_dcl = None
         self.vp_dca = None
         self.vp_dcf = None
@@ -279,6 +283,8 @@ class grd:
         self.cleaf = np.zeros(shape=(n,), order='F')
         self.cawood = np.zeros(shape=(n,), order='F')
         self.cfroot = np.zeros(shape=(n,), order='F')
+        self.csap = np.zeros(shape=(n,), order='F')
+        self.cheart = np.zeros(shape=(n,), order='F')
         self.area = np.zeros(shape=(npls, n))
         self.wue = np.zeros(shape=(n,), order='F')
         self.cue = np.zeros(shape=(n,), order='F')
@@ -479,6 +485,8 @@ class grd:
             self.vp_cleaf, self.vp_croot, self.vp_cwood, self.pls_table[6, :])
         self.vp_lsid = np.where(a > 0.0)[0]
         del a, b, c, d
+        self.vp_csap = 0.01 #PQ 0.01???
+        self.vp_cheart = 0.02
         self.vp_dcl = np.zeros(shape=(npls,), order='F')
         self.vp_dca = np.zeros(shape=(npls,), order='F')
         self.vp_dcf = np.zeros(shape=(npls,), order='F')
@@ -618,6 +626,8 @@ class grd:
                 cleaf = np.zeros(npls, order='F')
                 cwood = np.zeros(npls, order='F')
                 croot = np.zeros(npls, order='F')
+                csap = np.zeros(npls, order='F')
+                cheart = np.zeros(npls, order='F')
                 dcl = np.zeros(npls, order='F')
                 dca = np.zeros(npls, order='F')
                 dcf = np.zeros(npls, order='F')
@@ -633,6 +643,8 @@ class grd:
                     cleaf[n] = self.vp_cleaf[c]
                     cwood[n] = self.vp_cwood[c]
                     croot[n] = self.vp_croot[c]
+                    csap[n] = cwood[n]*0.05
+                    cheart[n] = cwood[n]*0.95
                     dcl[n] = self.vp_dcl[c]
                     dca[n] = self.vp_dca[c]
                     dcf[n] = self.vp_dcf[c]
@@ -643,8 +655,8 @@ class grd:
                 out = model.daily_budget(self.pls_table, self.wfim, self.gfim, self.sfim,
                                          self.soil_temp, temp[step], prec[step], p_atm[step],
                                          ipar[step], ru[step], self.sp_available_n, self.sp_available_p,
-                                         ton, top, self.sp_organic_p, co2, sto, cleaf, cwood, croot,
-                                         dcl, dca, dcf, uptk_costs)
+                                         ton, top, self.sp_organic_p, co2, sto, cleaf, cwood, croot, csap,
+                                         cheart, dcl, dca, dcf, uptk_costs)
 
                 del sto, cleaf, cwood, croot, dcl, dca, dcf, uptk_costs
                 self.wfim = None
@@ -915,6 +927,8 @@ class grd:
         cleaf = self.vp_cleaf
         cwood = self.vp_cwood
         croot = self.vp_croot
+        csap= cwood*0.05
+        cheart= cwood*0.95
         dcl = self.vp_dcl
         dca = self.vp_dca
         dcf = self.vp_dcf
@@ -949,7 +963,7 @@ class grd:
                                      ipar[step], ru[step], self.sp_available_n, self.sp_available_p,
                                      self.sp_snc[:4].sum(
                                      ), self.sp_so_p, self.sp_snc[4:].sum(),
-                                     co2, sto, cleaf, cwood, croot,
+                                     co2, sto, cleaf, cwood, croot, csap, cheart,
                                      dcl, dca, dcf, uptk_costs)
 
             self.wfim = None

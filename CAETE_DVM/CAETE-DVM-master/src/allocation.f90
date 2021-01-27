@@ -41,10 +41,10 @@ module alloc
 !c=====================================================================
 
    subroutine allocation(dt,npp,npp_costs,ts,wsoil,te,nmin, plab,on,&
-      & sop,op,scl1,sca1,scf1,storage,storage_out_alloc,scl2,sca2,scf2,&
-      & leaf_litter,cwd,root_litter,nitrogen_uptake, phosphorus_uptake,&
-      & litter_nutrient_content, limiting_nutrient, c_costs_of_uptake,&
-      & uptk_strategy)
+      & sop,op,scl1,sca1,scf1, scs1, sch1, storage,storage_out_alloc,scl2,&
+      & sca2,scf2, scs2, sch2, leaf_litter,ch2,root_litter,nitrogen_uptake,&
+      & phosphorus_uptake,litter_nutrient_content, limiting_nutrient,&
+      & c_costs_of_uptake, uptk_strategy)
 
 
       ! PARAMETERS
@@ -85,8 +85,10 @@ module alloc
       real(r_4),intent(in) :: wsoil! soil water depth (mm)
       real(r_8),intent(in) :: te   ! plant transpiration (mm/s)
       real(r_8),intent(in) :: scl1 ! previous day carbon content on leaf compartment (KgC/m2)
-      real(r_8),intent(in) :: sca1 ! previous day carbon content on aboveground woody biomass compartment(KgC/m2)
+      real(r_8),intent(in) :: sca1 ! previous day carbon content on aboveground woody biomass compartment(KgC/m2) - heart + sap
       real(r_8),intent(in) :: scf1 ! previous day carbon content on fine roots compartment (KgC/m2)
+      real(r_8),intent(in) :: scs1 ! previous day carbon content on sapwood compartment (KgC/m2)
+      real(r_8),intent(in) :: sch1 ! previous day carbon content on heartwood compartment (KgC/m2)
       real(r_4),intent(in) :: nmin ! N in mineral N pool(g m-2) SOLUTION
       real(r_4),intent(in) :: plab ! P in labile pool (g m-2)   SOLUTION
       real(r_8),intent(in) :: on,sop,op ! Organic N, Sorbed P, Organic P
@@ -96,7 +98,9 @@ module alloc
       real(r_8),intent(out) :: scl2 ! final carbon content on leaf compartment (KgC/m2)
       real(r_8),intent(out) :: sca2 ! final carbon content on aboveground woody biomass compartment (KgC/m2)
       real(r_8),intent(out) :: scf2 ! final carbon content on fine roots compartment (KgC/m2)
-      real(r_8),intent(out) :: cwd  ! coarse wood debris (to litter)(C) g m-2
+      real(r_8),intent(out) :: scs2 ! final carbon content on sapwood compartment (KgC/m2)
+      real(r_8),intent(out) :: sch2 ! final carbon content on heartwood compartment (KgC/m2)
+      real(r_8),intent(out) :: ch2  ! coarse wood debris (to litter)(C) g m-2
       real(r_8),intent(out) :: root_litter ! to litter g(C) m-2
       real(r_8),intent(out) :: leaf_litter ! to litter g(C) m-2
       real(r_8), dimension(2),intent(out) :: nitrogen_uptake ! N plant uptake g(N) m-2  INDEX //avail_n = 1, on = 2//
@@ -206,7 +210,9 @@ module alloc
       scl2                   = 0.0D0
       scf2                   = 0.0D0
       sca2                   = 0.0D0
-      cwd                    = 0.0D0
+      scs2                   = 0.0D0
+      sch2                   = 0.0D0
+      ch2                    = 0.0D0
       root_litter            = 0.0D0
       leaf_litter            = 0.0D0
       c_costs_of_uptake      = 0.0D0
@@ -398,7 +404,7 @@ module alloc
       ! POTENTIAL NPP FOR EACH POOL (WITH NO NUTRIENT LIMITATION)
 
       ! Use the bisection method (function below) to solve the leaf mass increment
-      npp_leaf = bisection_method(0.0, 3.0) !the new allocation logic, considering allometry
+      npp_leaf = bisection_method(0.0, 10.0) !the new allocation logic, considering allometry
 
       ! Once we have the leaf mass increment we can cant get 
       ! root mass increment based on the LTOR constant
@@ -407,6 +413,8 @@ module alloc
       ! npp_leaf =  aleaf * npp_pot    ! g(C)m⁻² !old logic.
       ! npp_root =  aroot * npp_pot    ! g(C)m⁻² !old logic.
 
+
+      !AQUI INCLUI SOMENTE O SAPWOOD - SCS1
       if (awood .gt. 0.0D0) then  !old logic.
          npp_wood =  awood * npp_pot    ! g(C)m⁻² !old logic.
       else
@@ -850,22 +858,22 @@ module alloc
 
       ! ## if it's a woody strategy:
       if(awood .gt. 0.0D0) then
-         cwd = sca1 / twood !/ tawood! Kg(C) m-2
-         sca2 = (1D3 * sca1) + daily_growth(wood) - (cwd * 2.73791075D0)  ! g(C) m-2
+         sch2 = scs1 / twood !/ tawood! Kg(C) m-2
+         scs2 = (1D3 * scs1) + daily_growth(wood) - (sch1 * 2.73791075D0)  ! g(C) m-2
       else
-         cwd = 0.0D0
-         sca2 = 0.0D0
+         sch2 = 0.0D0
+         scs2 = 0.0D0
       endif
 
       ! COnvert kg m-2 year-1 in  g m-2 day-1
       leaf_litter = leaf_litter * 2.73791075D0
       root_litter = root_litter * 2.73791075D0
-      cwd = cwd * 2.73791075D0
+      sch2 = sch1 * 2.73791075D0
 
       ! END CARBON TURNOVER
       leaf_litter_o =  leaf_litter
       root_litter_o = root_litter
-      cwd_o = cwd
+      cwd_o = ch2
 
 
       ! Nutrient resorption
@@ -922,6 +930,7 @@ module alloc
       scl2 = scl2 * 1.0D-3 !TRANSFOR FROM G/M2 TO KG/M2
       scf2 = scf2 * 1.0D-3 !TRANSFOR FROM G/M2 TO KG/M2
       if(awood .gt. 0.0D0) then
+         sca2 = scs2 + sch2 
          sca2 = sca2 * 1.0D-3 !TRANSFOR FROM G/M2 TO KG/M2
       else
          sca2 = 0.0D0 !TRANSFOR FROM G/M2 TO KG/M2
