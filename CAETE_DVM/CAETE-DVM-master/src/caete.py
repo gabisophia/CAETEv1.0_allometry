@@ -645,7 +645,7 @@ class grd:
                     croot[n] = self.vp_croot[c]
                     csap[n] = cwood[n]*0.05
                     cheart[n] = cwood[n]*0.95
-                    print('csap 1=',csap[n],'cheart 1=',cheart[n],'cwood 1=', cwood[n])
+     #               print('csap 1=',csap[n],'cheart 1=',cheart[n],'cwood 1=', cwood[n])
                     dcl[n] = self.vp_dcl[c]
                     dca[n] = self.vp_dca[c]
                     dcf[n] = self.vp_dcf[c]

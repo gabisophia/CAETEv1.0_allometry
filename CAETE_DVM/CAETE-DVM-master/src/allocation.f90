@@ -41,8 +41,8 @@ module alloc
 !c=====================================================================
 
    subroutine allocation(dt,npp,npp_costs,ts,wsoil,te,nmin, plab,on,&
-      & sop,op,scl1,sca1,scf1,storage,storage_out_alloc,scl2,sca2,scf2,&
-      & leaf_litter,cwd,root_litter,nitrogen_uptake, phosphorus_uptake,&
+      & sop,op,scl1,sca1,scf1,scs1,sch1,storage,storage_out_alloc,scl2,sca2,scf2,&
+      & scs2,sch2,leaf_litter,cwd,root_litter,nitrogen_uptake, phosphorus_uptake,&
       & litter_nutrient_content, limiting_nutrient, c_costs_of_uptake,&
       & uptk_strategy)
 
@@ -87,6 +87,8 @@ module alloc
       real(r_8),intent(in) :: scl1 ! previous day carbon content on leaf compartment (KgC/m2)
       real(r_8),intent(in) :: sca1 ! previous day carbon content on aboveground woody biomass compartment(KgC/m2)
       real(r_8),intent(in) :: scf1 ! previous day carbon content on fine roots compartment (KgC/m2)
+      real(r_8),intent(in) :: scs1 ! previous day carbon content on sapwood compartment (KgC/m2)
+      real(r_8),intent(in) :: sch1 ! previous day carbon content on heartwood compartment (KgC/m2)
       real(r_4),intent(in) :: nmin ! N in mineral N pool(g m-2) SOLUTION
       real(r_4),intent(in) :: plab ! P in labile pool (g m-2)   SOLUTION
       real(r_8),intent(in) :: on,sop,op ! Organic N, Sorbed P, Organic P
@@ -96,6 +98,8 @@ module alloc
       real(r_8),intent(out) :: scl2 ! final carbon content on leaf compartment (KgC/m2)
       real(r_8),intent(out) :: sca2 ! final carbon content on aboveground woody biomass compartment (KgC/m2)
       real(r_8),intent(out) :: scf2 ! final carbon content on fine roots compartment (KgC/m2)
+      real(r_8),intent(out) :: scs2 ! final carbon content on sapwwod compartment (KgC/m2)
+      real(r_8),intent(out) :: sch2 ! final carbon content on sapwwod compartment (KgC/m2)
       real(r_8),intent(out) :: cwd  ! coarse wood debris (to litter)(C) g m-2
       real(r_8),intent(out) :: root_litter ! to litter g(C) m-2
       real(r_8),intent(out) :: leaf_litter ! to litter g(C) m-2
@@ -206,6 +210,8 @@ module alloc
       scl2                   = 0.0D0
       scf2                   = 0.0D0
       sca2                   = 0.0D0
+      scs2                   = 0.0D0
+      sch2                   = 0.0D0
       cwd                    = 0.0D0
       root_litter            = 0.0D0
       leaf_litter            = 0.0D0
@@ -306,7 +312,7 @@ module alloc
       ! If there is not nutrients or NPP then no allocation process
       ! only deallocation label 294
       if(nmin .le. 0.0 .and. storage(2) .le. 0.0D0) then
-         daily_growth(wood) = 0.0D0
+         daily_growth(sapwood) = 0.0D0
          daily_growth(root) = 0.0D0
          daily_growth(leaf) = 0.0D0
          nuptk = 0.0D0
@@ -318,7 +324,7 @@ module alloc
       endif
 
       if(plab .le. 0.0D0 .and. storage(3) .le. 0.0D0) then
-         daily_growth(wood) = 0.0D0
+         daily_growth(sapwood) = 0.0D0
          daily_growth(root) = 0.0D0
          daily_growth(leaf) = 0.0D0
          nuptk = 0.0D0
@@ -330,7 +336,7 @@ module alloc
       endif
 
       if(npp .le. 0.0 .and. storage(1) .le. 0.0D0) then
-         daily_growth(wood) = 0.0D0
+         daily_growth(sapwood) = 0.0D0
          daily_growth(root) = 0.0D0
          daily_growth(leaf) = 0.0D0
          nuptk = 0.0D0
@@ -371,7 +377,7 @@ module alloc
       endif
 
       if(npp_pot .le. 0.0D0 .and. storage_out_alloc(1) .le. 0.0D0) then
-         daily_growth(wood) = 0.0D0
+         daily_growth(sapwood) = 0.0D0
          daily_growth(root) = 0.0D0
          daily_growth(leaf) = 0.0D0
          nuptk = 0.0D0
@@ -599,21 +605,21 @@ module alloc
          daily_growth(leaf) = npp_leaf
          daily_growth(root) = npp_root
          if(awood .gt. 0.0D0) then
-            daily_growth(wood) = npp_wood
+            daily_growth(sapwood) = npp_wood
          else
-            daily_growth(wood) = 0.0D0
+            daily_growth(sapwood) = 0.0D0
          endif
 
          limiting_nutrient(leaf) = 0
-         limiting_nutrient(wood) = 0
+         limiting_nutrient(sapwood) = 0
          limiting_nutrient(root) = 0
 
          rn_uptake(leaf) = daily_growth(leaf) * leaf_n2c
          rn_uptake(root) = daily_growth(root) * root_n2c
-         rn_uptake(wood) = daily_growth(wood) * wood_n2c
+         rn_uptake(wood) = daily_growth(sapwood) * wood_n2c
          rp_uptake(leaf) = daily_growth(leaf) * leaf_p2c
          rp_uptake(root) = daily_growth(root) * root_p2c
-         rp_uptake(wood) = daily_growth(wood) * wood_p2c
+         rp_uptake(wood) = daily_growth(sapwood) * wood_p2c
       else
          ! THERE IS LIMITATION
          !! LEAF
@@ -695,10 +701,10 @@ module alloc
             if (.not. any(is_limited(wood, :))) then
                ! NO LIMITATION IN THE wood POOL
                limiting_nutrient(wood) = 0
-               daily_growth(wood) = npp_wood
+               daily_growth(sapwood) = npp_wood
                to_storage_234 = 0.0D0
-               rn_uptake(wood) = daily_growth(wood) * wood_n2c
-               rp_uptake(wood) = daily_growth(wood) * wood_p2c
+               rn_uptake(wood) = daily_growth(sapwood) * wood_n2c
+               rp_uptake(wood) = daily_growth(sapwood) * wood_p2c
             else
             ! IDENTIFY LIMITING
                if(is_limited(wood, nitrog) .and. is_limited(wood, phosph)) then
@@ -719,15 +725,15 @@ module alloc
                       limiting_nutrient(wood) = phosph
                   endif
                endif
-               daily_growth(wood) = min(real_npp(wood,nitrog), real_npp(wood,phosph))
-               to_storage_234 = npp_wood - daily_growth(wood)
+               daily_growth(sapwood) = min(real_npp(wood,nitrog), real_npp(wood,phosph))
+               to_storage_234 = npp_wood - daily_growth(sapwood)
                storage_out_alloc(1) = add_pool(storage_out_alloc(1), to_storage_234)
                to_storage_234 = 0.0D0
-               rn_uptake(wood) = ((daily_growth(wood) * wood_av_n) / npp_wood)
-               rp_uptake(wood) = ((daily_growth(wood) * wood_av_p) / npp_wood)
+               rn_uptake(wood) = ((daily_growth(sapwood) * wood_av_n) / npp_wood)
+               rp_uptake(wood) = ((daily_growth(sapwood) * wood_av_p) / npp_wood)
             endif
          else
-            daily_growth(wood) = 0.0D0
+            daily_growth(sapwood) = 0.0D0
          endif
       endif
 
@@ -851,7 +857,7 @@ module alloc
       ! ## if it's a woody strategy:
       if(awood .gt. 0.0D0) then
          cwd = sca1 / twood !/ tawood! Kg(C) m-2
-         sca2 = (1D3 * sca1) + daily_growth(wood) - (cwd * 2.73791075D0)  ! g(C) m-2
+         sca2 = (1D3 * sca1) + daily_growth(sapwood) - (cwd * 2.73791075D0)  ! g(C) m-2
       else
          cwd = 0.0D0
          sca2 = 0.0D0
