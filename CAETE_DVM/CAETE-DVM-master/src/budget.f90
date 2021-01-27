@@ -125,7 +125,7 @@ contains
       real(r_4),parameter :: tsnow = -1.0
       real(r_4),parameter :: tice  = -2.5
 
-      real(r_8),dimension(npls) :: cl1_pft, cf1_pft, ca1_pft
+      real(r_8),dimension(npls) :: cl1_pft, cf1_pft, ca1_pft, cs1_pft, ch1_pft
       real(r_4) :: soil_temp
       real(r_4) :: psnow                !Snowfall (mm/day)
       real(r_4) :: prain                !Rainfall (mm/day)
@@ -193,6 +193,9 @@ contains
          cl1_pft(i) = cl1_in(i)
          ca1_pft(i) = ca1_in(i)
          cf1_pft(i) = cf1_in(i)
+         cs1_pft(i) = cs1_in(i)
+         ch1_pft(i) = ch1_in(i)
+         print*, 'sap2=', cs1_pft(i), 'heart 2=', ch1_pft(i), 'wood2=', ca1_pft(i)
          dleaf(i) = dleaf_in(i)
          dwood(i) = dwood_in(i)
          droot(i) = droot_in(i)

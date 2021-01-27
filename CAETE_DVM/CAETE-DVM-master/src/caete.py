@@ -485,8 +485,8 @@ class grd:
             self.vp_cleaf, self.vp_croot, self.vp_cwood, self.pls_table[6, :])
         self.vp_lsid = np.where(a > 0.0)[0]
         del a, b, c, d
-        self.vp_csap = 0.01 #PQ 0.01???
-        self.vp_cheart = 0.02
+        self.vp_csap = np.zeros(shape=(npls,), order='F')
+        self.vp_cheart = np.zeros(shape=(npls,), order='F')
         self.vp_dcl = np.zeros(shape=(npls,), order='F')
         self.vp_dca = np.zeros(shape=(npls,), order='F')
         self.vp_dcf = np.zeros(shape=(npls,), order='F')
@@ -645,6 +645,7 @@ class grd:
                     croot[n] = self.vp_croot[c]
                     csap[n] = cwood[n]*0.05
                     cheart[n] = cwood[n]*0.95
+                    print('csap 1=',csap[n],'cheart 1=',cheart[n],'cwood 1=', cwood[n])
                     dcl[n] = self.vp_dcl[c]
                     dca[n] = self.vp_dca[c]
                     dcf[n] = self.vp_dcf[c]
