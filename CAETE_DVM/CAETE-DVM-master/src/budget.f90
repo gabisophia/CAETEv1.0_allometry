@@ -125,7 +125,7 @@ contains
       real(r_4),parameter :: tsnow = -1.0
       real(r_4),parameter :: tice  = -2.5
 
-      real(r_8),dimension(npls) :: cl1_pft, cf1_pft, ca1_pft, cs1_pft, ch1_pft
+      real(r_8),dimension(npls) :: cl1_pft, cf1_pft, ca1_pft
       real(r_4) :: soil_temp
       real(r_4) :: psnow                !Snowfall (mm/day)
       real(r_4) :: prain                !Rainfall (mm/day)
@@ -161,9 +161,7 @@ contains
       real(r_8),dimension(:),allocatable :: tra
       real(r_8),dimension(:),allocatable :: cl2
       real(r_8),dimension(:),allocatable :: cf2
-      real(r_8),dimension(:),allocatable :: ca2    ! total carbon on abovegorund wood biomass pos-allocation
-      real(r_8),dimension(:),allocatable :: cs2    ! carbon on sapwood pos-allocation
-      real(r_8),dimension(:),allocatable :: cht2    ! carbon on heartwood pos-allocation
+      real(r_8),dimension(:),allocatable :: ca2    ! carbon pos-allocation
       real(r_8),dimension(:,:),allocatable :: day_storage      ! D0=3 g m-2
       real(r_8),dimension(:),allocatable   :: vcmax            ! µmol m-2 s-1
       real(r_8),dimension(:),allocatable   :: specific_la      ! m2 g(C)-1
@@ -269,8 +267,6 @@ contains
       allocate(cl2(nlen))
       allocate(cf2(nlen))
       allocate(ca2(nlen))
-      allocate(cs2(nlen))
-      allocate(cht2(nlen))
       allocate(day_storage(3,nlen))
 
       !     Maximum evapotranspiration   (emax)
@@ -295,7 +291,7 @@ contains
          dt1 = dt(:,ri) ! Pick up the pls functional attributes list
 
          call prod(dt1, ocp_wood(ri),catm, temp, soil_temp, p0, w(p), ipar, rh, emax&
-               &, cl1_pft(ri), ca1_pft(ri), cf1_pft(ri), cs1_pft(ri), dleaf(ri), dwood(ri), droot(ri)&
+               &, cl1_pft(ri), ca1_pft(ri), cf1_pft(ri), dleaf(ri), dwood(ri), droot(ri)&
                &, ph(p), ar(p), nppa(p), laia(p), f5(p), vpd(p), rm(p), rg(p), rc2(p)&
                &, wue(p), c_def(p), vcmax(p), specific_la(p), tra(p))
 
@@ -325,10 +321,9 @@ contains
          !     =====================================================
          call allocation (dt1,nppa(p),uptk_costs(ri), soil_temp, w(p), tra(p)&
             &,  mineral_n,labile_p, on, sop, op, cl1_pft(ri),ca1_pft(ri)&
-            &, cf1_pft(ri), cs1_pft(ri), ch1_pft(ri), storage_out_bdgt(:,p)&
-            &, day_storage(:,p),cl2(p),ca2(p), cf2(p),cs2(p),litter_l(p),cht2(p)&
-            &, litter_fr(p), nupt(:,p), pupt(:,p), lit_nut_content(:,p), limitation_status(:,p)&
-            &, npp2pay(p), uptk_strat(:, p))
+            &, cf1_pft(ri),storage_out_bdgt(:,p),day_storage(:,p),cl2(p),ca2(p)&
+            &, cf2(p),litter_l(p),cwd(p), litter_fr(p),nupt(:,p),pupt(:,p)&
+            &, lit_nut_content(:,p), limitation_status(:,p), npp2pay(p), uptk_strat(:, p))
 
          ! Estimate growth of storage C pool
          ! print*, uptk_strat(:,p)
@@ -358,7 +353,7 @@ contains
          if(dt1(4) .le. 0) then
             delta_cveg(2,p) = 0.0D0
          else
-            delta_cveg(2,p) = ca2(p) - ch1_pft(ri) !QUANTIDADE TOTAL DE CARBONO - CARBONO Q FOI PRO HEARTWOOD
+            delta_cveg(2,p) = ca2(p) - ca1_pft(ri)
          endif
          delta_cveg(3,p) = cf2(p) - cf1_pft(ri)
 
