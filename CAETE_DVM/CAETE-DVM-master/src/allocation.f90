@@ -55,7 +55,7 @@ module alloc
       integer(i_2), parameter :: leaf = 1
       integer(i_2), parameter :: wood = 2
       integer(i_2), parameter :: root = 3
-
+      integer(i_2), parameter :: sapwood = 4
       ! The Nutrient uptake possible strategies
       ! Soluble inorg_n_pool = (1, 2, 3, 4)
       ! Organic N pool = (5, 6)
@@ -125,7 +125,7 @@ module alloc
       real(r_8) :: root_av_p
 
       real(r_8) :: npp_pot ! potential npp g m-2 day-1
-      real(r_8), dimension(3) :: daily_growth ! amount of carbon allocated to leaf/wood/root g m-2 day-1
+      real(r_8), dimension(4) :: daily_growth ! amount of carbon allocated to leaf/wood/root g m-2 day-1
       real(r_8), dimension(3, 2) :: real_npp
       logical(l_1), dimension(3, 2) :: is_limited
       logical(l_1) :: lim_aux, kappa, test34, test35
@@ -195,11 +195,15 @@ module alloc
       real(r_8) :: tau2
       real(r_8) :: tau3
       real(r_8) :: SS
+      real(r_8) :: H
       real(r_8) :: searched_x
       real(r_8) :: x
       real(r_8) :: delta_leaf
       real(r_8) :: delta_root
       real(r_8) :: delta_sapwood
+      real(r_8) :: carbon_sapwood !variável de teste para calculo do sapwood
+      real(r_8) :: carbon_heartwood !variável de teste para calculo do sapwood
+
       ! real(r_8) :: test_a = 1
       ! real(r_8) :: test_b = 2
 
@@ -224,6 +228,7 @@ module alloc
       tau2                   = 0.0D0
       tau3                   = 0.0D0
       SS                     = 0.0D0
+      H                      = 0.0D0
       searched_x             = 0.0D0
       delta_leaf             = 0.0D0
       delta_root             = 0.0D0
@@ -282,6 +287,10 @@ module alloc
       ccn(:)                 = 0.0D0
       ccp(:)                 = 0.0D0
 
+      !!initialize test variables
+      carbon_sapwood = 0.0D0
+
+
       ! Catch the functional/demographic traits of pls
       !  head = ['g1', 'resopfrac', 'tleaf', 'twood', 'troot', 'aleaf', 'awood', 'aroot', 'c4',
       !  'leaf_n2c', 'awood_n2c', 'froot_n2c', 'leaf_p2c', 'awood_p2c', 'froot_p2c', pdia, amp]
@@ -302,12 +311,26 @@ module alloc
       pdia = dt(16)
       amp = dt(17)
 
-      !TESTE - DELTAS - REVER UNIDADES.
+
 
       ! Finally using the cmass_increment mass conservation we can calculate sapwood increment
       delta_sapwood = npp_pot - npp_leaf - delta_root
       !print*, 'DELTA SAPWOOD =', delta_sapwood
 
+      !testing carbon sapwood calculation
+      carbon_sapwood = sapwood2()
+      if(carbon_sapwood.le.0.0D0) then
+         carbon_sapwood = 0.0D0
+      endif
+!      print*,'carbon_sapwood', carbon_sapwood,'scs1', scs1, 'sca1', sca1
+
+      !testing carbon heartwood calculation
+      carbon_heartwood = heartwood2()
+      if(carbon_heartwood.le.0.0D0) then
+         carbon_heartwood = 0.0D0
+      endif
+!      print*, 'sca1', sca1, 'sch1', sch1, 'carbon heartwood', carbon_heartwood
+     
 
       ! If there is not nutrients or NPP then no allocation process
       ! only deallocation label 294
@@ -315,6 +338,7 @@ module alloc
          daily_growth(wood) = 0.0D0
          daily_growth(root) = 0.0D0
          daily_growth(leaf) = 0.0D0
+         daily_growth(sapwood) = 0.0D0         
          nuptk = 0.0D0
          puptk = 0.0D0
          storage_out_alloc(1) = max(0.0D0, real(npp,kind=r_8) * (1000.0D0 / 365.242D0))
@@ -327,6 +351,7 @@ module alloc
          daily_growth(wood) = 0.0D0
          daily_growth(root) = 0.0D0
          daily_growth(leaf) = 0.0D0
+         daily_growth(sapwood) = 0.0D0
          nuptk = 0.0D0
          puptk = 0.0D0
          storage_out_alloc(1) = max(0.0D0, real(npp,kind=r_8) * (1000.0D0 / 365.242D0))
@@ -339,6 +364,7 @@ module alloc
          daily_growth(wood) = 0.0D0
          daily_growth(root) = 0.0D0
          daily_growth(leaf) = 0.0D0
+         daily_growth(sapwood) = 0.0D0
          nuptk = 0.0D0
          puptk = 0.0D0
          storage_out_alloc(1) = storage(1)
@@ -1025,17 +1051,16 @@ module alloc
    
          real(r_8) :: SS
         
-         SS = sca1 + npp_pot - scl1 / ltor + scf1
+         SS = scs1 + npp_pot - scl1 / ltor + scf1
       end function sapwood2
 
-      ! function teste (test_a, test_b) result (test_c)
-      !    real(r_8), intent(in) :: test_a
-      !    real(r_8), intent(in) :: test_b
-      !    real(r_8) :: test_c
+       function heartwood2() result (H)
 
-      !    test_c = test_a + test_b
+          real(r_8) :: H
 
-      ! end function teste
+          H = sch1 + (turnover_rate_sapwood*scs1)
+
+      end function heartwood2
 
    end subroutine allocation
 

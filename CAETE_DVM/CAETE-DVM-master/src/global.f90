@@ -102,6 +102,6 @@ module allometry_par
          ltor = 0.77302587552347657 ,&    !ratio between increment in leaf and root
          tol = 0.0000001      ,&
          pi = 3.1415926536    ,&
-         krp = 1.6                        !allometric constant (Table 3; Sitch et al., 2003)
-         
+         krp = 1.6            ,&            !allometric constant (Table 3; Sitch et al., 2003)
+         turnover_rate_sapwood = 0.05       !fix value for allometry/allocation calculus (Table1, Sitch et al., 2003)
 end module allometry_par
