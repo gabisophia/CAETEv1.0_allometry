@@ -203,6 +203,13 @@ module alloc
       real(r_8) :: delta_sapwood
       real(r_8) :: carbon_sapwood !variável de teste para calculo do sapwood
       real(r_8) :: carbon_heartwood !variável de teste para calculo do sapwood
+      real(r_8) :: cf_sapwood !variavel teste para cálculo do carbono final no sapwood
+      real(r_8) :: cf_wood !variável teste para cálculo do carbono final no caule todo
+      real(r_8) :: cf_leaf !variavel teste para calculo do carbono final nas folhas
+      real(r_8) :: cf_root !variavel teste para calculo do carbono final nas raizes finas
+      real(r_8) :: turn_leaf !variavel teste para calculo do turnover das folhas (C to litter)
+      real(r_8) :: turn_sap !variavel teste para calculo do turnover do sapwood (C to heartwood)
+      real(r_8) :: turn_root !variavel teste para calculo do turnover das raizes finas (C to litter)
 
       ! real(r_8) :: test_a = 1
       ! real(r_8) :: test_b = 2
@@ -289,6 +296,14 @@ module alloc
 
       !!initialize test variables
       carbon_sapwood = 0.0D0
+      cf_sapwood = 0.0D0
+      cf_wood = 0.0D0
+      cf_leaf = 0.0D0
+      cf_root = 0.0D0
+      turn_sap = 0.0D0
+      turn_leaf = 0.0D0
+      turn_root = 0.0D0
+
 
 
       ! Catch the functional/demographic traits of pls
@@ -314,21 +329,21 @@ module alloc
 
 
       ! Finally using the cmass_increment mass conservation we can calculate sapwood increment
-      delta_sapwood = npp_pot - npp_leaf - delta_root
+      !delta_sapwood = npp_pot - npp_leaf - delta_root
       !print*, 'DELTA SAPWOOD =', delta_sapwood
 
       !testing carbon sapwood calculation
-      carbon_sapwood = sapwood2()
-      if(carbon_sapwood.le.0.0D0) then
-         carbon_sapwood = 0.0D0
-      endif
-!      print*,'carbon_sapwood', carbon_sapwood,'scs1', scs1, 'sca1', sca1
+!       carbon_sapwood = sapwood2()
+!       if(carbon_sapwood.le.0.0D0) then
+!          carbon_sapwood = 0.0D0
+!       endif
+! !      print*,'carbon_sapwood', carbon_sapwood,'scs1', scs1, 'sca1', sca1
 
-      !testing carbon heartwood calculation
-      carbon_heartwood = heartwood2()
-      if(carbon_heartwood.le.0.0D0) then
-         carbon_heartwood = 0.0D0
-      endif
+!       !testing carbon heartwood calculation
+!       carbon_heartwood = heartwood2()
+!       if(carbon_heartwood.le.0.0D0) then
+!          carbon_heartwood = 0.0D0
+!       endif
 !      print*, 'sca1', sca1, 'sch1', sch1, 'carbon heartwood', carbon_heartwood
      
 
@@ -430,20 +445,28 @@ module alloc
       ! POTENTIAL NPP FOR EACH POOL (WITH NO NUTRIENT LIMITATION)
 
       ! Use the bisection method (function below) to solve the leaf mass increment
-      npp_leaf = bisection_method(0.0, 3.0) !the new allocation logic, considering allometry
+      npp_leaf = bisection_method(0.0, 5.0) !the new allocation logic, considering allometry
 
       ! Once we have the leaf mass increment we can cant get 
       ! root mass increment based on the LTOR constant
       npp_root = (npp_leaf + scl1) / ltor - scf1
 
+      if (awood .gt. 0.0D0) then  !new logic.
+         npp_wood = npp_pot - npp_leaf - npp_root   ! g(C)m⁻² !new logic.
+      else
+         npp_wood = 0.0 !new logic.
+      endif
+
+      ! ==================== OLD LOGIC ======================= !
       ! npp_leaf =  aleaf * npp_pot    ! g(C)m⁻² !old logic.
       ! npp_root =  aroot * npp_pot    ! g(C)m⁻² !old logic.
 
-      if (awood .gt. 0.0D0) then  !old logic.
-         npp_wood =  awood * npp_pot    ! g(C)m⁻² !old logic.
-      else
-         npp_wood = 0.0 !old logic.
-      endif
+      ! if (awood .gt. 0.0D0) then  !old logic.
+      !    npp_wood =  awood * npp_pot    ! g(C)m⁻² !old logic.
+      ! else
+      !    npp_wood = 0.0 !old logic.
+      ! endif
+      ! ====================================================== !
 
       ! POTENTIAL NUTRIENT UPTAKE
       nscl = npp_leaf * leaf_n2c    ! NITROGEN TO ALLOCATE LEAF NPP g(N)m⁻²
@@ -877,13 +900,13 @@ module alloc
       root_litter = scf1 / troot  !/ tfroot! kg(C) m-2 year-1
 
       ! UPDATE C content of each compartment in g m-2
-      scl2 = (1D3 * scl1) + daily_growth(leaf) - (leaf_litter * 2.73791075D0)
-      scf2 = (1D3 * scf1) + daily_growth(root) - (root_litter * 2.73791075D0)
+      ! scl2 = (1D3 * scl1) + daily_growth(leaf) - (leaf_litter * 2.73791075D0)
+      ! scf2 = (1D3 * scf1) + daily_growth(root) - (root_litter * 2.73791075D0)
 
       ! ## if it's a woody strategy:
       if(awood .gt. 0.0D0) then
          cwd = sca1 / twood !/ tawood! Kg(C) m-2
-         sca2 = (1D3 * sca1) + daily_growth(wood) - (cwd * 2.73791075D0)  ! g(C) m-2
+         ! sca2 = (1D3 * sca1) + daily_growth(wood) - (cwd * 2.73791075D0)  ! g(C) m-2
       else
          cwd = 0.0D0
          sca2 = 0.0D0
@@ -950,14 +973,61 @@ module alloc
       endif
       ! END RETRANSLOCATION CALCULATIONS
 
-      ! Finalize
-      scl2 = scl2 * 1.0D-3 !TRANSFOR FROM G/M2 TO KG/M2
-      scf2 = scf2 * 1.0D-3 !TRANSFOR FROM G/M2 TO KG/M2
+      !======================================================================================================
+
+      !LITTER OF CVEG POOLS
+      turn_leaf = turnover_rate*scl1
+      turn_sap = turnover_rate_sapwood*scs1
+      turn_root = turnover_rate*scf1
+
+      !======================================================================================================
+
+      !testing final carbon on sapwood calculation - aonde entra o tempo de residẽncia (tawood)?
+      !cf_sapwood = scs2 in gC/m-2
+      cf_sapwood = (scs1 + daily_growth(wood)) - turn_sap ![este ultimo termo equivale ao H]
+      if(cf_sapwood .le. 0.0D0) then
+         cf_sapwood = 0.0D0
+      endif
+      ! print*, 'CARBON FINAL ON SAPWOOD =', cf_sapwood, 'DAILY WOOD', daily_growth(wood)
+
+      !testing final carbon on leaf calculation - aonde entra o tempo de residẽncia (tleaf)?
+      !cf_leaf = scl2 in gC/m-2
+      cf_leaf = (scl1 + daily_growth(leaf)) - turn_leaf
+      if(cf_leaf .le. 0.0D0) then
+         cf_leaf = 0.0D0
+      endif
+      ! print*, 'CARBON FINAL ON LEAF =', cf_leaf, 'DAILY LEAF =', daily_growth(leaf), 'PREVIOS CARBON =',&
+      !  scl1, 'TURN_LEAF =', turn_leaf
+
+      !testing final carbon on root calculation - aonde entra o tempo de residẽncia (troot)?
+      !cf_root = scl2 in gC/m-2
+      cf_root = (scf1 + daily_growth(root)) - turn_root
+      if(cf_root .le. 0.0D0) then
+         cf_root = 0.0D0
+      endif
+      ! print*, 'CARBON FINAL ON ROOT =', cf_root, 'DAILY ROOT =', daily_growth(root), 'PREVIOS CARBON =',&
+      !  scf1, 'TURN_LEAF =', turn_root
+
+      !testing final carbon on wood compartment calculation
+      !cf_wood = sca2 in gC/m-2
+      cf_wood = cf_sapwood + (sch1 + turn_sap)
+      ! print*, 'TOTAL WOOD CARBON =', cf_wood, 'CF SAP =', cf_sapwood, 'HEART prev=', sch1, 'TURN SAP =', turn_sap
+
+      !======================================================================================================
+
+
+     ! Finalize
+      scl2 = cf_leaf * 1.0D-3 !TRANSFOR FROM G/M2 TO KG/M2
+      scf2 = cf_root * 1.0D-3 !TRANSFOR FROM G/M2 TO KG/M2
       if(awood .gt. 0.0D0) then
-         sca2 = sca2 * 1.0D-3 !TRANSFOR FROM G/M2 TO KG/M2
+         sca2 = cf_wood * 1.0D-3 !TRANSFOR FROM G/M2 TO KG/M2
       else
          sca2 = 0.0D0 !TRANSFOR FROM G/M2 TO KG/M2
       endif
+
+      !print*, 'SCL2 =', scl2, 'SCF2 =', scf2, 'SCA2 =', sca2
+
+      !======================================================================================================
 
       c_costs_of_uptake = active_nupt_cost + active_pupt_cost &
       &                   + n_cost_resorpt + p_cost_resorpt + negative_one
@@ -1019,7 +1089,7 @@ module alloc
          
          searched_x = & 
              calc_tau1() * &
-             (sapwood2() - x - x / ltor + sca1) - &
+             (sapwood2() - x - x / ltor + sch1) - &
              ( &
                  (sapwood2() - x - x / ltor) / &
                  (scl1 + x) * calc_tau3() &
@@ -1065,69 +1135,3 @@ module alloc
    end subroutine allocation
 
 end module alloc
-
-module allometry 
-
-   use types, only : r_8
-   use allometry_par
-   use alloc
-
-   real(r_8) :: test_diameter
-   real(r_8) :: diam
-   real(r_8) :: crown_area
-   real(r_8) :: height
-
-   ! test_diameter = diameter(dw, k_allom2, k_allom3, pi, sca2)
-   ! print*, 'DIAMETER =', test_diameter
-
-contains 
-
-   function diameter (dw, k_allom2, k_allom3, pi, sca2) result (diam)
-      !Returns in tree diameter in m.
- 
-      real(r_8), intent(in) :: dw 
-      real(r_8), intent(in) :: k_allom2
-      real(r_8), intent(in) :: k_allom3 
-      real(r_8), intent(in) :: pi
-      real(r_8), intent(in) :: sca2 !final carbon content on aboveground woody biomass compartment (KgC/m2)
-      real(r_8) :: diam
-
-      diam = ((4*(sca2*1.0D3))/((dw*1.0D6)*pi*k_allom2))**&
-      &(1/(2+k_allom3)) !dw/1000 is to return to the unit g/cm3 
-
-      !1.0D3 - Transforma a quantidade de C no caule [sca2] de kgC/m2 para gC/m2 (Smith et al., 2001)
-      !1.0D6 - Transforma o wood density de g/cm-3 para g/m-3 (Smith et al., 2001)
-
-   end function diameter
-
-   !=================================================================
-   !=================================================================
-
-   function area_crown (k_allom1, krp, diam)  result (crown_area)
-      !Returns in tree crown area in m2.
-
-		real(r_8), intent(in) :: diam
-		real(r_8), intent(in) :: k_allom1
-		real(r_8), intent(in) :: krp
-		real(r_8) :: crown_area
-
-		crown_area = k_allom1*(diam**krp)
-
-   end function area_crown
-   
-   !=================================================================
-   !=================================================================
-
-   function tree_height (k_allom2, k_allom3, diam) result (height)
-      !Returns in tree height in m.
-      
-		real(r_8), intent(in) :: diam
-		real(r_8), intent(in) :: k_allom2
-		real(r_8), intent(in) :: k_allom3
-		real(r_8) :: height
-
-		height = k_allom2*(diam**k_allom3)
-
-	end function tree_height
-
-end module allometry
