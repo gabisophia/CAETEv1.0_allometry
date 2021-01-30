@@ -162,8 +162,8 @@ contains
       real(r_8),dimension(:),allocatable :: cl2
       real(r_8),dimension(:),allocatable :: cf2
       real(r_8),dimension(:),allocatable :: ca2    ! carbon pos-allocation
- !     real(r_8),dimension(:),allocatable :: cs2    ! carbon pos-allocation
- !     real(r_8),dimension(:),allocatable :: ch2    ! carbon pos-allocation
+      real(r_8),dimension(:),allocatable :: cs2    ! carbon pos-allocation
+      real(r_8),dimension(:),allocatable :: ch2    ! carbon pos-allocation
       real(r_8),dimension(:,:),allocatable :: day_storage      ! D0=3 g m-2
       real(r_8),dimension(:),allocatable   :: vcmax            ! µmol m-2 s-1
       real(r_8),dimension(:),allocatable   :: specific_la      ! m2 g(C)-1
@@ -272,6 +272,8 @@ contains
       allocate(cl2(nlen))
       allocate(cf2(nlen))
       allocate(ca2(nlen))
+      allocate(ch2(nlen))
+      allocate(cs2(nlen))
       allocate(day_storage(3,nlen))
 
       !     Maximum evapotranspiration   (emax)
@@ -327,7 +329,7 @@ contains
          call allocation (dt1,nppa(p),uptk_costs(ri), soil_temp, w(p), tra(p)&
             &,  mineral_n,labile_p, on, sop, op, cl1_pft(ri),ca1_pft(ri)&
             &, cf1_pft(ri),cs1_pft(ri),ch1_pft(ri),storage_out_bdgt(:,p),day_storage(:,p),cl2(p),ca2(p)&
-            &, cf2(p),litter_l(p),cwd(p), litter_fr(p),nupt(:,p),pupt(:,p)&
+            &, cf2(p),ch2(p),cs2(p),litter_l(p),cwd(p), litter_fr(p),nupt(:,p),pupt(:,p)&
             &, lit_nut_content(:,p), limitation_status(:,p), npp2pay(p), uptk_strat(:, p))
 
          ! Estimate growth of storage C pool
@@ -613,6 +615,8 @@ contains
       deallocate(cl2)
       deallocate(cf2)
       deallocate(ca2)
+      deallocate(ch2)
+      deallocate(cs2)
       deallocate(day_storage)
 
    end subroutine daily_budget

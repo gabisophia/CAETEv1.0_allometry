@@ -42,7 +42,7 @@ module alloc
 
    subroutine allocation(dt,npp,npp_costs,ts,wsoil,te,nmin, plab,on,&
       & sop,op,scl1,sca1,scf1,scs1,sch1,storage,storage_out_alloc,scl2,sca2,scf2,&
-      & leaf_litter,cwd,root_litter,nitrogen_uptake, phosphorus_uptake,&
+      & sch2,scs2,leaf_litter,cwd,root_litter,nitrogen_uptake, phosphorus_uptake,&
       & litter_nutrient_content, limiting_nutrient, c_costs_of_uptake,&
       & uptk_strategy)
 
@@ -98,8 +98,8 @@ module alloc
       real(r_8),intent(out) :: scl2 ! final carbon content on leaf compartment (KgC/m2)
       real(r_8),intent(out) :: sca2 ! final carbon content on aboveground woody biomass compartment (KgC/m2)
       real(r_8),intent(out) :: scf2 ! final carbon content on fine roots compartment (KgC/m2)
-!      real(r_8),intent(out) :: scs2 ! final carbon content on sapwwod compartment (KgC/m2)
-!      real(r_8),intent(out) :: sch2 ! final carbon content on sapwwod compartment (KgC/m2)
+      real(r_8),intent(out) :: scs2 ! final carbon content on sapwwod compartment (KgC/m2)
+      real(r_8),intent(out) :: sch2 ! final carbon content on sapwwod compartment (KgC/m2)
       real(r_8),intent(out) :: cwd  ! coarse wood debris (to litter)(C) g m-2
       real(r_8),intent(out) :: root_litter ! to litter g(C) m-2
       real(r_8),intent(out) :: leaf_litter ! to litter g(C) m-2
@@ -130,7 +130,7 @@ module alloc
       logical(l_1), dimension(3, 2) :: is_limited
       logical(l_1) :: lim_aux, kappa, test34, test35
 
-      real(r_8) :: npp_wood , npp_root , npp_leaf  ! Partitioned npp (g(C) m-2 day-1)
+      real(r_8) :: npp_sapwood , npp_root , npp_leaf  ! Partitioned npp (g(C) m-2 day-1)
       real(r_8) :: npp_aux
 
       ! Auxiliary variables to calculate Plant Nutrient Uptake
@@ -205,8 +205,8 @@ module alloc
       real(r_8) :: carbon_sapwood !variável de teste para calculo do sapwood
       real(r_8) :: carbon_heartwood !variável de teste para calculo do sapwood
       real(r_8) :: heart 
-      real(r_8) :: scs2
-      real(r_8) :: sch2
+
+
 
       ! real(r_8) :: test_a = 1
       ! real(r_8) :: test_b = 2
@@ -218,8 +218,8 @@ module alloc
       scl2                   = 0.0D0
       scf2                   = 0.0D0
       sca2                   = 0.0D0
-!      scs2                   = 0.0D0
-!      sch2                   = 0.0D0
+      scs2                   = 0.0D0
+      sch2                   = 0.0D0
       cwd                    = 0.0D0
       root_litter            = 0.0D0
       leaf_litter            = 0.0D0
@@ -292,9 +292,6 @@ module alloc
       ccn(:)                 = 0.0D0
       ccp(:)                 = 0.0D0
 
-      !!initialize test variables
-      scs2 = 0.0D0
-      sch2 = 0.0D0
 
 
 
@@ -325,17 +322,17 @@ module alloc
       !print*, 'DELTA SAPWOOD =', delta_sapwood
 
       !testing carbon sapwood calculation
-!       carbon_sapwood = sapwood2()
-!       if(carbon_sapwood.le.0.0D0) then
-!          carbon_sapwood = 0.0D0
-!       endif
+      carbon_sapwood = sapwood2()
+      if(carbon_sapwood.le.0.0D0) then
+         carbon_sapwood = 0.0D0
+      endif
 ! !      print*,'carbon_sapwood', carbon_sapwood,'scs1', scs1, 'sca1', sca1
 
 !       !testing carbon heartwood calculation
-!       carbon_heartwood = heartwood2()
-!       if(carbon_heartwood.le.0.0D0) then
-!          carbon_heartwood = 0.0D0
-!       endif
+      carbon_heartwood = heartwood2()
+      if(carbon_heartwood.le.0.0D0) then
+         carbon_heartwood = 0.0D0
+      endif
 !      print*, 'sca1', sca1, 'sch1', sch1, 'carbon heartwood', carbon_heartwood
      
 
@@ -444,9 +441,9 @@ module alloc
       npp_root = (npp_leaf + scl1) / ltor - scf1
 
       if (awood .gt. 0.0D0) then  !new logic.
-         npp_wood = npp_pot - npp_leaf - npp_root   ! g(C)m⁻² !new logic.
+         npp_sapwood = npp_pot - npp_leaf - npp_root   ! g(C)m⁻² !new logic.
       else
-         npp_wood = 0.0 !new logic.
+         npp_sapwood = 0.0 !new logic.
       endif
 
       ! ==================== OLD LOGIC ======================= !
@@ -467,8 +464,8 @@ module alloc
       pscf = npp_root * root_p2c    ! g(P)m⁻²'
 
       if (awood .gt. 0.0D0) then
-         nsca = npp_wood * wood_n2c    ! [...] g(N)m⁻²'
-         psca = npp_wood * wood_p2c    ! g(P)m⁻²
+         nsca = npp_sapwood * wood_n2c    ! [...] g(N)m⁻²'
+         psca = npp_sapwood * wood_p2c    ! g(P)m⁻²
       else
          nsca = 0.0D0
          psca = 0.0D0
@@ -578,7 +575,7 @@ module alloc
       lim_aux = .false.
       npp_aux = 0.0D0
       if (awood .gt. 0.0D0) then
-         CALL realized_npp(npp_wood, nsca, wood_av_n, npp_aux, lim_aux)
+         CALL realized_npp(npp_sapwood, nsca, wood_av_n, npp_aux, lim_aux)
       endif
 
       ! Limitation
@@ -618,7 +615,7 @@ module alloc
       lim_aux = .false.
       npp_aux = 0.0D0
       if (awood .gt. 0.0D0) then
-         CALL realized_npp(npp_wood, psca, wood_av_p, npp_aux, lim_aux)
+         CALL realized_npp(npp_sapwood, psca, wood_av_p, npp_aux, lim_aux)
       endif
 
       ! Limitation
@@ -646,7 +643,7 @@ module alloc
          daily_growth(leaf) = npp_leaf
          daily_growth(root) = npp_root
          if(awood .gt. 0.0D0) then
-            daily_growth(wood) = npp_wood
+            daily_growth(wood) = npp_sapwood
          else
             daily_growth(wood) = 0.0D0
          endif
@@ -742,7 +739,7 @@ module alloc
             if (.not. any(is_limited(wood, :))) then
                ! NO LIMITATION IN THE wood POOL
                limiting_nutrient(wood) = 0
-               daily_growth(wood) = npp_wood
+               daily_growth(wood) = npp_sapwood
                to_storage_234 = 0.0D0
                rn_uptake(wood) = daily_growth(wood) * wood_n2c
                rp_uptake(wood) = daily_growth(wood) * wood_p2c
@@ -767,11 +764,11 @@ module alloc
                   endif
                endif
                daily_growth(wood) = min(real_npp(wood,nitrog), real_npp(wood,phosph))
-               to_storage_234 = npp_wood - daily_growth(wood)
+               to_storage_234 = npp_sapwood - daily_growth(wood)
                storage_out_alloc(1) = add_pool(storage_out_alloc(1), to_storage_234)
                to_storage_234 = 0.0D0
-               rn_uptake(wood) = ((daily_growth(wood) * wood_av_n) / npp_wood)
-               rp_uptake(wood) = ((daily_growth(wood) * wood_av_p) / npp_wood)
+               rn_uptake(wood) = ((daily_growth(wood) * wood_av_n) / npp_sapwood)
+               rp_uptake(wood) = ((daily_growth(wood) * wood_av_p) / npp_sapwood)
             endif
          else
             daily_growth(wood) = 0.0D0
@@ -899,10 +896,10 @@ module alloc
       ! ## if it's a woody strategy:
       if(awood .gt. 0.0D0) then
          cwd = sca1 / twood !/ tawood! Kg(C) m-2 [total de C do caule todo q vai pro litter] - cálculo de C final no caule
-         heart = scs1 * turnover_rate_sapwood ![total de sap q vai pro heartwood] - year-1
+         heart = scs1 * turnover_rate_sapwood ![total of sapwood that is converted in heartwood - year-1
          scs2 = (scs1*1D3) + daily_growth(wood) - (heart * 2.73791075D0) !quantidade de C final no sap. (internal variable)
-         sch2 = (sch1*1D3) + (heart * 2.73791075D0) !quantidade de C final no heart. (internal variable)
-         sca2 = (scs2 + sch2) - (cwd * 2.73791075D0) !quantidade de C final no caule
+         sch2 = (sch1*1D3) + (heart * 2.73791075D0) - (cwd * 2.73791075D0) !quantidade de C final no heart. (internal variable)
+         sca2 = (scs2 + sch2)  !quantidade de C final no caule
 
          !sca2 = (1D3 * sca1) + daily_growth(wood) - (cwd * 2.73791075D0)  ! g(C) m-2 ~ OLD LOGIC
       else
@@ -981,10 +978,16 @@ module alloc
 
       scl2 = scl2 * 1.0D-3 !TRANSFOR FROM G/M2 TO KG/M2
       scf2 = scf2 * 1.0D-3 !TRANSFOR FROM G/M2 TO KG/M2
+      scs2 = scs2 * 1.0D-3 !TRANSFOR FROM G/M2 TO KG/M2
+
       if(awood .gt. 0.0D0) then
-         sca2 = sca2 * 1.0D-3 !TRANSFOR FROM G/M2 TO KG/M2 - this is sapwood only
+         sca2 = sca2 * 1.0D-3 !TRANSFOR FROM G/M2 TO KG/M2 
+         scs2 = scs2 * 1.0D-3 !TRANSFOR FROM G/M2 TO KG/M2
+         sch2 = sch2 * 1.0D-3 !TRANSFOR FROM G/M2 TO KG/M2
       else
          sca2 = 0.0D0 !TRANSFOR FROM G/M2 TO KG/M2
+         scs2 = 0.0D0 !TRANSFOR FROM G/M2 TO KG/M2
+         sch2 = 0.0D0 !TRANSFOR FROM G/M2 TO KG/M2
       endif
 
       !print*, 'LEAF =', scl2, 'ROOT =', scf2, 'WOOD =', sca2
