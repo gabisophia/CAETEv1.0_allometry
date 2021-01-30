@@ -47,7 +47,7 @@ contains
       real(r_8), intent(in) :: k_allom3 
       real(r_8), intent(in) :: pi
       real(r_8), intent(in) :: cawood !final carbon content on aboveground woody biomass compartment (KgC/m2) [sap + heart]
-      real(r_4) :: diam 
+      real(r_8):: diam 
 
       diam = ((4*(cawood*1.0D3))/((dw*1.0D6)*pi*k_allom2))**&
       &(1/(2+k_allom3)) !dw/1000 is to return to the unit g/cm3 
@@ -66,7 +66,7 @@ contains
       use types, only: r_8
       !implicit none
 
-		real(r_8), intent(in) :: diam
+		! real(r_8), intent(in) :: diam
 		real(r_8), intent(in) :: k_allom1
 		real(r_8), intent(in) :: krp
 		real(r_8) :: crown_area
@@ -84,7 +84,7 @@ contains
       use types, only: r_8, r_4
       !implicit none
       
-		real(r_8), intent(in) :: diam !in m.
+		! real(r_8), intent(in) :: diam !in m.
 		real(r_8), intent(in) :: k_allom2
 		real(r_8), intent(in) :: k_allom3
 		real(r_4) :: height
@@ -167,7 +167,7 @@ contains
 
       real(r_8) :: crownarea !m2
       real(r_8) :: area_crown
-      real(r_8) :: diam
+      ! real(r_8) :: diam
      
       crownarea = area_crown(k_allom1, krp, diam)
 
