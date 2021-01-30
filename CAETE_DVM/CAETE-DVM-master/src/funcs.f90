@@ -13,6 +13,88 @@
 !     You should have received a copy of the GNU General Public License
 !     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+module allometry 
+
+   ! Module defining functions related with allometric structuring in CAETE
+
+   use types, only : r_8
+   use allometry_par
+
+   !implicit none
+   private
+
+
+   ! functions(f) are defined here
+   real (r_8), public ::        &
+        diameter               ,& ! (f), gross photosynthesis (kgC m-2 y-1)
+        area_crown             ,& ! (f), leaf area index(m2 m-2)
+        tree_height               ! (f), auxiliar function (calculates f4sun or f4shade or sunlai)
+
+   ! real(r_8) :: diam
+   ! real(r_8) :: crown_area
+   ! real(r_8) :: height
+
+contains 
+
+   function diameter (dw, k_allom2, k_allom3, pi, cawood) result (diam)
+      !Returns in tree diameter in m.
+
+      use types, only: r_8, r_4
+      !implicit none
+ 
+      real(r_8), intent(in) :: dw !in g/cm-3
+      real(r_8), intent(in) :: k_allom2
+      real(r_8), intent(in) :: k_allom3 
+      real(r_8), intent(in) :: pi
+      real(r_8), intent(in) :: cawood !final carbon content on aboveground woody biomass compartment (KgC/m2) [sap + heart]
+      real(r_4) :: diam 
+
+      diam = ((4*(cawood*1.0D3))/((dw*1.0D6)*pi*k_allom2))**&
+      &(1/(2+k_allom3)) !dw/1000 is to return to the unit g/cm3 
+
+      !1.0D3 - Transforma a quantidade de C no caule [sca2] de kgC/m2 para gC/m2 (Smith et al., 2001)
+      !1.0D6 - Transforma o wood density de g/cm-3 para g/m-3 (Smith et al., 2001)
+
+   end function diameter
+
+   !=================================================================
+   !=================================================================
+
+   function area_crown (k_allom1, krp, diam)  result (crown_area)
+      !Returns in tree crown area in m2.
+
+      use types, only: r_8
+      !implicit none
+
+		real(r_8), intent(in) :: diam
+		real(r_8), intent(in) :: k_allom1
+		real(r_8), intent(in) :: krp
+		real(r_8) :: crown_area
+
+		crown_area = k_allom1*(diam**krp)
+
+   end function area_crown
+   
+   !=================================================================
+   !=================================================================
+
+   function tree_height (k_allom2, k_allom3, diam) result (height)
+      !Returns in tree height in m.
+
+      use types, only: r_8, r_4
+      !implicit none
+      
+		real(r_8), intent(in) :: diam !in m.
+		real(r_8), intent(in) :: k_allom2
+		real(r_8), intent(in) :: k_allom3
+		real(r_4) :: height
+
+		height = k_allom2*(diam**k_allom3)
+
+   end function tree_height
+
+end module allometry
+
 module photo
 
    ! Module defining functions related with CO2 assimilation and other processes in CAETE
@@ -42,7 +124,7 @@ module photo
         spinup3                ,& ! (s), SPINUP function to check the viability of Allocation/residence time combinations
         g_resp                 ,& ! (f), growth Respiration (kg m-2 yr-1)
         pft_area_frac          ,& ! (s), area fraction by biomass
-        water_ue
+        water_ue             
 
 contains
 
@@ -73,18 +155,48 @@ contains
    function leaf_area_index(cleaf, sla) result(lai)
       ! Returns Leaf Area Index m2 m-2
 
-      use types, only: r_8
+      use types, only : r_8, r_4
+      use allometry_par
+      !use allometry
+
       !implicit none
 
-      real(r_8),intent(in) :: cleaf !kgC m-2
-      real(r_8),intent(in) :: sla   !m2 gC-1
+      real(r_8), intent(in) :: cleaf !kgC m-2
+      real(r_8), intent(in) :: sla   !m2 gC-1
       real(r_8) :: lai
 
+      real(r_8) :: crownarea !m2
+      real(r_8) :: area_crown
+      real(r_8) :: diam
+     
+      crownarea = area_crown(k_allom1, krp, diam)
 
-      lai  = cleaf * 1.0D3 * sla  ! Converts cleaf from (KgC m-2) to (gCm-2)
-      if(lai .lt. 0.0D0) lai = 0.0D0
+
+      lai  = (cleaf * 1.0D3 * sla)/crownarea  ! Converts cleaf from (KgC m-2) to (gCm-2)
+
+      if (lai .lt. 0.0D0) then
+         lai = 0.0D0
+      end if
 
    end function leaf_area_index
+
+   !OLD LOGIC -----------------------------------------------------------------
+
+   ! function leaf_area_index(cleaf, sla) result(lai)
+   !    ! Returns Leaf Area Index m2 m-2
+
+   !    use types, only: r_8
+   !    !implicit none
+
+   !    real(r_8),intent(in) :: cleaf !kgC m-2
+   !    real(r_8),intent(in) :: sla   !m2 gC-1
+   !    real(r_8) :: lai
+
+
+   !    lai  = cleaf * 1.0D3 * sla  ! Converts cleaf from (KgC m-2) to (gCm-2)
+   !    if(lai .lt. 0.0D0) lai = 0.0D0
+
+   ! end function leaf_area_index
 
    !=================================================================
    !=================================================================
@@ -1354,69 +1466,4 @@ contains
   !=================================================================
 
 end module water
-
-module allometry 
-
-   use types, only : r_8
-   use allometry_par
-
-   real(r_8) :: test_diameter
-   real(r_8) :: diam
-   real(r_8) :: crown_area
-   real(r_8) :: height
-
-   ! test_diameter = area_crown(k_allom1, krp, diam)
-   ! print*, 'DIAMETER =', test_diameter
-
-contains 
-
-   function diameter (dw, k_allom2, k_allom3, pi, cawood) result (diam)
-      !Returns in tree diameter in m.
- 
-      real(r_8), intent(in) :: dw 
-      real(r_8), intent(in) :: k_allom2
-      real(r_8), intent(in) :: k_allom3 
-      real(r_8), intent(in) :: pi
-      real(r_8), intent(in) :: cawood !final carbon content on aboveground woody biomass compartment (KgC/m2)
-      real(r_8) :: diam
-
-      diam = ((4*(cawood*1.0D3))/((dw*1.0D6)*pi*k_allom2))**&
-      &(1/(2+k_allom3)) !dw/1000 is to return to the unit g/cm3 
-
-      !1.0D3 - Transforma a quantidade de C no caule [sca2] de kgC/m2 para gC/m2 (Smith et al., 2001)
-      !1.0D6 - Transforma o wood density de g/cm-3 para g/m-3 (Smith et al., 2001)
-
-   end function diameter
-
-   !=================================================================
-   !=================================================================
-
-   function area_crown (k_allom1, krp, diam)  result (crown_area)
-      !Returns in tree crown area in m2.
-
-		real(r_8), intent(in) :: diam
-		real(r_8), intent(in) :: k_allom1
-		real(r_8), intent(in) :: krp
-		real(r_8) :: crown_area
-
-		crown_area = k_allom1*(diam**krp)
-
-   end function area_crown
-   
-   !=================================================================
-   !=================================================================
-
-   function tree_height (k_allom2, k_allom3, diam) result (height)
-      !Returns in tree height in m.
-      
-		real(r_8), intent(in) :: diam
-		real(r_8), intent(in) :: k_allom2
-		real(r_8), intent(in) :: k_allom3
-		real(r_8) :: height
-
-		height = k_allom2*(diam**k_allom3)
-
-	end function tree_height
-
-end module allometry
 
