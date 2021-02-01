@@ -205,7 +205,9 @@ module alloc
       real(r_8) :: carbon_sapwood !variável de teste para calculo do sapwood
       real(r_8) :: carbon_heartwood !variável de teste para calculo do sapwood
       real(r_8) :: heart 
-
+      real(r_8) :: scs1_previous_day !previous day day carbon content on sapwood (in order to updt using allometric restrictions)
+      real(r_8) :: sch1_previous_day !previous day day carbon content on heart (in order to updt using allometric restrictions)
+      real(r_8) :: sca1_previous_day !previous day day carbon content on heart (in order to updt using allometric restrictions)
 
 
       ! real(r_8) :: test_a = 1
@@ -317,23 +319,7 @@ module alloc
 
 
 
-      ! Finally using the cmass_increment mass conservation we can calculate sapwood increment
-      !delta_sapwood = npp_pot - npp_leaf - delta_root
-      !print*, 'DELTA SAPWOOD =', delta_sapwood
 
-      !testing carbon sapwood calculation
-      carbon_sapwood = sapwood2()
-      if(carbon_sapwood.le.0.0D0) then
-         carbon_sapwood = 0.0D0
-      endif
-! !      print*,'carbon_sapwood', carbon_sapwood,'scs1', scs1, 'sca1', sca1
-
-!       !testing carbon heartwood calculation
-      carbon_heartwood = heartwood2()
-      if(carbon_heartwood.le.0.0D0) then
-         carbon_heartwood = 0.0D0
-      endif
-!      print*, 'sca1', sca1, 'sch1', sch1, 'carbon heartwood', carbon_heartwood
      
 
       ! If there is not nutrients or NPP then no allocation process
@@ -386,7 +372,9 @@ module alloc
       npp_pot  = 0.0D0
       avail_n = 0.0D0
       avail_p = 0.0D0
-
+      scs1_previous_day = 0.0D0
+      sch1_previous_day = 0.0D0
+      sca1_previous_day = 0.0D0
       ! You have: kg m-2 year-1
       ! You want: g m-2 day-1
       npp_pot = (real(npp,kind=r_8) * (1000.0D0 / 365.242D0)) ! Transform Kg m-2 Year-1 to g m-2 day
@@ -888,20 +876,39 @@ module alloc
       ! ROOT LITTER
       root_litter = scf1 / troot  !/ tfroot! kg(C) m-2 year-1
 
-      ! UPDATE C content of each compartment in g m-2
+!!!!!! UPDATE C content of each compartment in g m-2
 
       scl2 = ((1D3 * scl1) + daily_growth(leaf)) - (leaf_litter * 2.73791075D0)
       scf2 = ((1D3 * scf1) + daily_growth(root)) - (root_litter * 2.73791075D0)
 
+      !inside update,now the carbon contents are calculated considering the allometrics restriction
+      carbon_sapwood = sapwood2()
+      if(carbon_sapwood.le.0.0D0) then
+         carbon_sapwood = 0.0D0
+      endif
+! !      print*,'carbon_sapwood', carbon_sapwood,'scs1', scs1, 'sca1', sca1
+
+      carbon_heartwood = heartwood2()
+      if(carbon_heartwood.le.0.0D0) then
+         carbon_heartwood = 0.0D0
+      endif
+!      print*, 'sca1', sca1, 'sch1', sch1, 'carbon heartwood', carbon_heartwood
+
+
       ! ## if it's a woody strategy:
       if(awood .gt. 0.0D0) then
-         cwd = sca1 / twood !/ tawood! Kg(C) m-2 [total de C do caule todo q vai pro litter] - cálculo de C final no caule
-         heart = scs1 * turnover_rate_sapwood ![total of sapwood that is converted in heartwood - year-1
+         scs1_previous_day = carbon_sapwood
+         heart = scs1_previous_day * turnover_rate_sapwood ![total of sapwood that is converted in heartwood - year-1
          scs2 = (scs1*1D3) + daily_growth(wood) - (heart * 2.73791075D0) !quantidade de C final no sap. (internal variable)
-         sch2 = (sch1*1D3) + (heart * 2.73791075D0) - (cwd * 2.73791075D0) !quantidade de C final no heart. (internal variable)
-         sca2 = (scs2 + sch2)  !quantidade de C final no caule
 
-         !sca2 = (1D3 * sca1) + daily_growth(wood) - (cwd * 2.73791075D0)  ! g(C) m-2 ~ OLD LOGIC
+         sch1_previous_day = carbon_heartwood
+         sch2 = (sch1_previous_day*1D3) + (heart * 2.73791075D0) ! !quantidade de C final no heart. (internal variable)
+        
+         sca1_previous_day = (scs1_previous_day + sch1_previous_day)  !quantidade de C final no caule
+         cwd =  sca1_previous_day/ twood !/ tawood! Kg(C) m-2 [total de C do caule todo q vai pro litter] - cálculo de C final no caule
+         sca2 = (scs2 + sch2)- (cwd * 2.73791075D0)  !quantidade de C final no caule
+        
+
       else
          cwd = 0.0D0
          heart = 0.0D0
