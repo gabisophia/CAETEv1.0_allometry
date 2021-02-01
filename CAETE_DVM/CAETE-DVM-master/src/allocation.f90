@@ -898,13 +898,13 @@ module alloc
       ! ## if it's a woody strategy:
       if(awood .gt. 0.0D0) then
          scs1_previous_day = carbon_sapwood
-         heart = scs1_previous_day * turnover_rate_sapwood ![total of sapwood that is converted in heartwood - year-1
-         scs2 = (scs1*1D3) + daily_growth(wood) - (heart * 2.73791075D0) !quantidade de C final no sap. (internal variable)
+         heart = (scs1_previous_day*1D3) * turnover_rate_sapwood ![total of sapwood that is converted in heartwood - year-1
+         scs2 = (scs1_previous_day*1D3) + daily_growth(wood) - (heart * 2.73791075D0) !quantidade de C final no sap. (internal variable)
 
          sch1_previous_day = carbon_heartwood
          sch2 = (sch1_previous_day*1D3) + (heart * 2.73791075D0) ! !quantidade de C final no heart. (internal variable)
         
-         sca1_previous_day = (scs1_previous_day + sch1_previous_day)  !quantidade de C final no caule
+         sca1_previous_day = ((scs1_previous_day*1D3) + (sch1_previous_day*1D3))  !quantidade de C final no caule
          cwd =  sca1_previous_day/ twood !/ tawood! Kg(C) m-2 [total de C do caule todo q vai pro litter] - cálculo de C final no caule
          sca2 = (scs2 + sch2)- (cwd * 2.73791075D0)  !quantidade de C final no caule
         
@@ -985,12 +985,12 @@ module alloc
 
       scl2 = scl2 * 1.0D-3 !TRANSFOR FROM G/M2 TO KG/M2
       scf2 = scf2 * 1.0D-3 !TRANSFOR FROM G/M2 TO KG/M2
-      scs2 = scs2 * 1.0D-3 !TRANSFOR FROM G/M2 TO KG/M2
-
+    
       if(awood .gt. 0.0D0) then
          sca2 = sca2 * 1.0D-3 !TRANSFOR FROM G/M2 TO KG/M2 
          scs2 = scs2 * 1.0D-3 !TRANSFOR FROM G/M2 TO KG/M2
          sch2 = sch2 * 1.0D-3 !TRANSFOR FROM G/M2 TO KG/M2
+!         print*,'scs2', scs2,'sch2',sch2,'sca2',sca2,'leaf',scl2,'root',scf2
       else
          sca2 = 0.0D0 !TRANSFOR FROM G/M2 TO KG/M2
          scs2 = 0.0D0 !TRANSFOR FROM G/M2 TO KG/M2
