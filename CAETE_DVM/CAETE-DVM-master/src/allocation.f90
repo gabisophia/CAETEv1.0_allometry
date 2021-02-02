@@ -84,7 +84,7 @@ module alloc
       real(r_4),intent(in) :: ts   ! soil temp °C
       real(r_4),intent(in) :: wsoil! soil water depth (mm)
       real(r_8),intent(in) :: te   ! plant transpiration (mm/s)
-      real(r_8),intent(in) :: scl1 ! previous day carbon content on leaf compartment (KgC/m2)
+      real(r_8),dimension(3), intent(in) :: scl1 ! previous day carbon content on leaf compartment (KgC/m2)
       real(r_8),intent(in) :: sca1 ! previous day carbon content on aboveground woody biomass compartment(KgC/m2)
       real(r_8),intent(in) :: scf1 ! previous day carbon content on fine roots compartment (KgC/m2)
       real(r_8),intent(in) :: scs1 ! previous day carbon content on sapwood compartment (KgC/m2)
@@ -95,7 +95,7 @@ module alloc
       real(r_8),dimension(3),intent(in) :: storage ! Three element array- storage pool([C,N,P]) g m-2
       ! O
       real(r_8),dimension(3),intent(out) :: storage_out_alloc
-      real(r_8),intent(out) :: scl2 ! final carbon content on leaf compartment (KgC/m2)
+      real(r_8),dimension(3), intent(out) :: scl2 ! final carbon content on leaf compartment (KgC/m2)
       real(r_8),intent(out) :: sca2 ! final carbon content on aboveground woody biomass compartment (KgC/m2)
       real(r_8),intent(out) :: scf2 ! final carbon content on fine roots compartment (KgC/m2)
       real(r_8),intent(out) :: scs2 ! final carbon content on sapwwod compartment (KgC/m2)
@@ -116,7 +116,7 @@ module alloc
       real(r_8) :: puptk ! P plant uptake g(P) m-2
       real(r_8) :: scf2_tmp ! Store veg carbon pool in a 64bit fp
       real(r_8) :: sca2_tmp
-      real(r_8) :: scl2_tmp
+      real(r_8), dimension(3) :: scl2_tmp
       real(r_8) :: leaf_av_n
       real(r_8) :: wood_av_n
       real(r_8) :: root_av_n
@@ -217,7 +217,7 @@ module alloc
       ! initialize ALL outputs
       storage_out_alloc            = (/0.0D0, 0.0D0, 0.0D0/)
       litter_nutrient_content = (/0.0D0, 0.0D0, 0.0D0, 0.0D0, 0.0D0, 0.0D0/)
-      scl2                   = 0.0D0
+      scl2(:)                = 0.0D0
       scf2                   = 0.0D0
       sca2                   = 0.0D0
       scs2                   = 0.0D0
@@ -260,7 +260,7 @@ module alloc
       rp_uptake(:)           = 0.0D0
       scf2_tmp               = 0.0D0
       sca2_tmp               = 0.0D0
-      scl2_tmp               = 0.0D0
+      scl2_tmp(:)            = 0.0D0
       leaf_av_n              = 0.0D0
       wood_av_n              = 0.0D0
       root_av_n              = 0.0D0
@@ -368,7 +368,7 @@ module alloc
       ! INTERNAL VARIABLES
       scf2_tmp = 0.0D0
       sca2_tmp = 0.0D0
-      scl2_tmp = 0.0D0
+      scl2_tmp(:) = 0.0D0
       npp_pot  = 0.0D0
       avail_n = 0.0D0
       avail_p = 0.0D0
@@ -426,7 +426,7 @@ module alloc
 
       ! Once we have the leaf mass increment we can cant get 
       ! root mass increment based on the LTOR constant
-      npp_root = (npp_leaf + scl1) / ltor - scf1
+      npp_root = (npp_leaf + sum(scl1)) / ltor - scf1
 
       if (awood .gt. 0.0D0) then  !new logic.
          npp_sapwood = npp_pot - npp_leaf - npp_root   ! g(C)m⁻² !new logic.
@@ -872,13 +872,24 @@ module alloc
 294   continue ! Material going to soil + updating veg pools
 
       ! LEAF LITTER FLUX
-      leaf_litter = scl1 / tleaf  !/ tleaf ! kg(C) m-2 year-1
+      leaf_litter = scl1(3) / tleaf  !/ tleaf ! kg(C) m-2 year-1
+      !Alteração no código antigo:
+      !leaf_litter = ((1e3 * scl1(3)) * (tleaf * 365.242)**(-1)) !/ tleaf ! g(C) m-2
+      !leafscl2 = ((1e3 * scl1(1)) * (tleaf * 365.242)**(-1))
+      !leafscl3 = ((1e3 * scl1(3)) * (tleaf * 365.242)**(-1))
+      !leafscl2 e 3 - acrescentas como sendo total da npp dado a limitação de N e P g(C)m-2 day-2
+
       ! ROOT LITTER
       root_litter = scf1 / troot  !/ tfroot! kg(C) m-2 year-1
 
 !!!!!! UPDATE C content of each compartment in g m-2
 
-      scl2 = ((1D3 * scl1) + daily_growth(leaf)) - (leaf_litter * 2.73791075D0)
+      scl2(1) = ((1D3 * scl1(1)) + daily_growth(leaf)) - (leaf_litter * 2.73791075D0)
+      !Alteração no código antigo: FALTA ARRUMAR PRAS DIFERENTES COORTES
+      !scl2_128(1) = (1e3 * scl1(1)) + npp_leaf - leafscl2
+      !scl2_128(2) = (1e3 * scl1(2)) + leafscl2 - leafscl3
+      !scl2_128(3) = (1e3 * scl1(3)) - leaf_litter + leafscl3
+      !scf2_128 = (1e3 * scf1) + npp_froot - root_litter
       scf2 = ((1D3 * scf1) + daily_growth(root)) - (root_litter * 2.73791075D0)
 
       !inside update,now the carbon contents are calculated considering the allometrics restriction
@@ -983,7 +994,7 @@ module alloc
       
       !FINALIZE:
 
-      scl2 = scl2 * 1.0D-3 !TRANSFOR FROM G/M2 TO KG/M2
+      scl2(:) = scl2(:) * 1.0D-3 !TRANSFOR FROM G/M2 TO KG/M2
       scf2 = scf2 * 1.0D-3 !TRANSFOR FROM G/M2 TO KG/M2
     
       if(awood .gt. 0.0D0) then
@@ -1064,7 +1075,7 @@ module alloc
              (sapwood2() - x - x / ltor + sch1) - &
              ( &
                  (sapwood2() - x - x / ltor) / &
-                 (scl1 + x) * calc_tau3() &
+                 (sum(scl1) + x) * calc_tau3() &
              ) ** calc_tau2()
       end function f
 
@@ -1093,7 +1104,7 @@ module alloc
    
          real(r_8) :: SS
         
-         SS = scs1 + npp_pot - scl1 / ltor + scf1
+         SS = scs1 + npp_pot - sum(scl1) / ltor + scf1
       end function sapwood2
 
        function heartwood2() result (H)
