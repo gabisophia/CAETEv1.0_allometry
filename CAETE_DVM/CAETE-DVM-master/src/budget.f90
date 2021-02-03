@@ -329,7 +329,7 @@ contains
          !     =====================================================
          call allocation (dt1,nppa(p),uptk_costs(ri), soil_temp, w(p), tra(p)&
             &,  mineral_n,labile_p, on, sop, op, cl1_pft(:,ri),ca1_pft(ri)&
-            &, cf1_pft(:,ri),cs1_pft(ri),ch1_pft(ri),storage_out_bdgt(:,p),day_storage(:,p),cl2(:,p),ca2(p)&
+            &, cf1_pft(ri),cs1_pft(ri),ch1_pft(ri),storage_out_bdgt(:,p),day_storage(:,p),cl2(:,p),ca2(p)&
             &, cf2(p),ch2(p),cs2(p),litter_l(p),cwd(p), litter_fr(p),nupt(:,p),pupt(:,p)&
             &, lit_nut_content(:,p), limitation_status(:,p), npp2pay(p), uptk_strat(:, p))
 
@@ -388,7 +388,9 @@ contains
                cf1_int(p) = cf2(p)
             endif
          endif
-         if(sum(cl1_int(:,p)) .lt. 0.0D0) cl1_int(:,p) = 0.0D0
+         if(cl1_int(1,p) .lt. 0.0D0) cl1_int(1,p) = 0.0D0
+         if(cl1_int(2,p) .lt. 0.0D0) cl1_int(2,p) = 0.0D0
+         if(cl1_int(3,p) .lt. 0.0D0) cl1_int(3,p) = 0.0D0
          if(ca1_int(p) .lt. 0.0D0) ca1_int(p) = 0.0D0
          if(cf1_int(p) .lt. 0.0D0) cf1_int(p) = 0.0D0
 
