@@ -127,6 +127,7 @@ module alloc
       real(r_8) :: npp_pot ! potential npp g m-2 day-1
       real(r_8), dimension(4) :: daily_growth ! amount of carbon allocated to leaf/wood/root g m-2 day-1
       real(r_8), dimension(3, 2) :: real_npp
+      real(r_8), dimension(3) :: age_limits
       logical(l_1), dimension(3, 2) :: is_limited
       logical(l_1) :: lim_aux, kappa, test34, test35
 
@@ -174,6 +175,7 @@ module alloc
       real(r_8) :: to_storage_234, from_sto2npp
       real(r_8) :: mult_factor_n, mult_factor_p
       real(r_8) :: n_leaf, p_leaf, new_leaf_n2c, new_leaf_p2c, leaf_litter_o
+      real(r_8) :: fluxc_1, fluxc_2  !fluxo de C dentre a coorte 1-2 e 2-3. deixa aqui mesmo?
       real(r_8) :: root_litter_o
       real(r_8) :: cwd_o
       real(r_8) :: heart_o
@@ -871,25 +873,20 @@ module alloc
       ! CARBON AND NUTRIENTS TURNOVER
 294   continue ! Material going to soil + updating veg pools
 
-      ! LEAF LITTER FLUX
+      ! LEAF LITTER FLUX and flux C between cohorts
       leaf_litter = scl1(3) / tleaf  !/ tleaf ! kg(C) m-2 year-1
-      !Alteração no código antigo:
-      !leaf_litter = ((1e3 * scl1(3)) * (tleaf * 365.242)**(-1)) !/ tleaf ! g(C) m-2
-      !leafscl2 = ((1e3 * scl1(1)) * (tleaf * 365.242)**(-1))
-      !leafscl3 = ((1e3 * scl1(3)) * (tleaf * 365.242)**(-1))
-      !leafscl2 e 3 - acrescentas como sendo total da npp dado a limitação de N e P g(C)m-2 day-2
+      fluxc_2 = scl1(2) / age_limits(2)
+      fluxc_1 = scl1(1) / age_limits(1)
 
       ! ROOT LITTER
       root_litter = scf1 / troot  !/ tfroot! kg(C) m-2 year-1
 
 !!!!!! UPDATE C content of each compartment in g m-2
-
-      scl2(1) = ((1D3 * scl1(1)) + daily_growth(leaf)) - (leaf_litter * 2.73791075D0)
-      !Alteração no código antigo: FALTA ARRUMAR PRAS DIFERENTES COORTES
-      !scl2_128(1) = (1e3 * scl1(1)) + npp_leaf - leafscl2
-      !scl2_128(2) = (1e3 * scl1(2)) + leafscl2 - leafscl3
-      !scl2_128(3) = (1e3 * scl1(3)) - leaf_litter + leafscl3
-      !scf2_128 = (1e3 * scf1) + npp_froot - root_litter
+      !CONFERIR UNIDADES DO CARBONO e ver se SCL é 1 ou 2 no meio da equação
+      scl2(1) = ((1D3 * scl1(1)) + daily_growth(leaf)) - fluxc_1 * 2.73791075D0
+      scl2(2) = ((1D3 * scl1(2)) + scl1(1)) - (fluxc_2 * 2.73791075D0)
+      scl2(3) = ((1D3 * scl1(3)) + scl1(2)) - (leaf_litter * 2.73791075D0)
+      
       scf2 = ((1D3 * scf1) + daily_growth(root)) - (root_litter * 2.73791075D0)
 
       !inside update,now the carbon contents are calculated considering the allometrics restriction
