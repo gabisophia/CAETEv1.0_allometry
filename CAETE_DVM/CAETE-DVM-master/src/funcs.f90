@@ -135,7 +135,7 @@ contains
       !implicit none
 
       real(r_8),intent(in) :: f1    !molCO2 m-2 s-1
-      real(r_8),intent(in) :: cleaf !kgC m-2
+      real(r_8),dimension(3),intent(in) :: cleaf !kgC m-2
       real(r_8),intent(in) :: sla   !m2 gC-1
       real(r_4) :: ph
 
@@ -143,7 +143,7 @@ contains
       real(r_8) :: f4shade
 
       f1in = f1
-      f4sun = f_four(1,cleaf,sla)
+      f4sun = f_four(1,sum(cleaf),sla)
       f4shade = f_four(2,cleaf,sla)
 
       ph = real((0.012D0*31557600.0D0*f1in*f4sun*f4shade), r_4)
@@ -762,12 +762,12 @@ contains
       real(kind=r_4) :: sensitivity
       real(kind=r_4) :: nppot2
       ! outputs
-      real(kind=r_4),intent(out) :: cleafini
+      real(kind=r_4),dimension(3),intent(out) :: cleafini
       real(kind=r_4),intent(out) :: cawoodini
       real(kind=r_4),intent(out) :: cfrootini
 
       ! more internal
-      real(kind=r_4),dimension(ntl) :: cleafi_aux
+      real(kind=r_4),dimension(3,ntl) :: cleafi_aux
       real(kind=r_4),dimension(ntl) :: cfrooti_aux
       real(kind=r_4),dimension(ntl) :: cawoodi_aux
 
@@ -801,7 +801,7 @@ contains
       nppot2 = nppot !/real(npls,kind=r_4)
       do k=1,ntl
          if (k.eq.1) then
-            cleafi_aux (k) =  aleaf * nppot2
+            cleafi_aux (:,k) =  aleaf * nppot2
             cawoodi_aux(k) = aawood * nppot2
             cfrooti_aux(k) = afroot * nppot2
          else
@@ -872,12 +872,12 @@ contains
       real(kind=r_4) :: sensitivity
       real(kind=r_4) :: nppot2
       ! outputs
-      real(kind=r_4),dimension(npls),intent(out) :: cleafini
+      real(kind=r_4),dimension(3,npls),intent(out) :: cleafini
       real(kind=r_4),dimension(npls),intent(out) :: cfrootini
       real(kind=r_4),dimension(npls),intent(out) :: cawoodini
 
       ! more internal
-      real(kind=r_4),dimension(ntl) :: cleafi_aux
+      real(kind=r_4),dimension(3,ntl) :: cleafi_aux
       real(kind=r_4),dimension(ntl) :: cfrooti_aux
       real(kind=r_4),dimension(ntl) :: cawoodi_aux
 
@@ -1144,13 +1144,15 @@ contains
 
       integer(kind=i_4),parameter :: npft = npls ! plss futuramente serao
 
-      real(kind=r_8),dimension(npft),intent( in) :: cleaf1, cfroot1, cawood1, awood
+      real(kind=r_8),dimension(3,npft),intent(in) :: cleaf1
+      real(kind=r_8),dimension(npft),intent(in) :: cfroot1, cawood1, awood
       real(kind=r_8),dimension(npft),intent(out) :: ocp_coeffs
       logical(kind=l_1),dimension(npft),intent(out) :: ocp_wood
       integer(kind=i_4),dimension(npft),intent(out) :: run_pls
       real(kind=r_8), dimension(npls), intent(out) :: c_to_soil
       logical(kind=l_1),dimension(npft) :: is_living
-      real(kind=r_8),dimension(npft) :: cleaf, cawood, cfroot
+      real(kind=r_8),dimension(3,npft) :: cleaf
+      real(kind=r_8),dimension(npft) :: cawood, cfroot
       real(kind=r_8),dimension(npft) :: total_biomass_pft,total_w_pft
       integer(kind=i_4) :: p,i
       integer(kind=i_4),dimension(1) :: max_index
@@ -1160,7 +1162,7 @@ contains
       total_biomass = 0.0D0
       total_wood = 0.0D0
 
-      cleaf = cleaf1
+      cleaf(:) = cleaf1(:)
       cfroot = cfroot1
       cawood = cawood1
 

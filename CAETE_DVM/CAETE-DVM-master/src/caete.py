@@ -195,6 +195,7 @@ class grd:
         self.wsoil = None
         self.rm = None
         self.rg = None
+        self.cl_total = None
         self.cleaf = None
         self.cawood = None
         self.cfroot = None
@@ -487,7 +488,7 @@ class grd:
         del a, b, c, d
         self.vp_csap = np.zeros(shape=(npls,), order='F')
         self.vp_cheart = np.zeros(shape=(npls,), order='F')
-        self.vp_dcl = np.zeros(shape=(npls,), order='F')
+        self.vp_dcl = np.zeros(shape=(npls), order='F')
         self.vp_dca = np.zeros(shape=(npls,), order='F')
         self.vp_dcf = np.zeros(shape=(npls,), order='F')
         self.vp_ocp = np.zeros(shape=(npls,), order='F')
@@ -623,7 +624,7 @@ class grd:
                     self.sfim[pls] = self.wp_snow
 
                 sto = np.zeros(shape=(3, npls), order='F')
-                cleaf = np.zeros(3,npls, order='F')
+                cleaf = np.zeros(npls, order='F')
                 cwood = np.zeros(npls, order='F')
                 croot = np.zeros(npls, order='F')
                 csap = np.zeros(npls, order='F')
